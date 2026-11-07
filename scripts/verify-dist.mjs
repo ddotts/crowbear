@@ -1,0 +1,52 @@
+import assert from "node:assert/strict";
+import { access, readdir, readFile } from "node:fs/promises";
+
+const output = new URL("../dist/", import.meta.url);
+let count = 0;
+for (const entry of await readdir(output, { withFileTypes: true })) {
+  if (!entry.isDirectory()) continue;
+  const base = new URL(`${entry.name}/`, output);
+  const manifest = JSON.parse(
+    await readFile(new URL("manifest.json", base), "utf8"),
+  );
+  const pkg = JSON.parse(
+    await readFile(
+      new URL(`../extensions/${entry.name}/package.json`, import.meta.url),
+      "utf8",
+    ),
+  );
+  assert.equal(manifest.manifest_version, 1);
+  assert.equal(manifest.version, pkg.version);
+  assert.ok(manifest.name.length > 0 && manifest.name.length <= 45);
+  assert.ok(manifest.description.length <= 128);
+  for (const path of [
+    manifest.icon,
+    manifest.action.icon,
+    manifest.action.popover,
+  ]) {
+    assert.ok(
+      path.startsWith("./"),
+      `${entry.name}: manifest path must be relative: ${path}`,
+    );
+    const url = new URL(path, base);
+    assert.ok(
+      url.href.startsWith(base.href),
+      `${entry.name}: path escapes extension directory`,
+    );
+    await access(url);
+  }
+  const html = await readFile(new URL(manifest.action.popover, base), "utf8");
+  for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
+    const path = match[1];
+    assert.ok(
+      path.startsWith("./"),
+      `${entry.name}: built asset must be relative: ${path}`,
+    );
+    await access(new URL(path, base));
+  }
+  count++;
+  console.log(
+    `Verified ${entry.name}: manifest, version, icons, popover, and bundled assets`,
+  );
+}
+assert.ok(count > 0, "No installable extensions were built");

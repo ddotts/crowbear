@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crowbear Sandbox</title>
+  </head>
+  <body>
+    <main>
+      <header><span class="eyebrow">CROWBEAR / SANDBOX</span><h1>Let Dice+ roll.</h1></header>
+      <p class="intro">A small workbench for the next extension.</p>
+      <p id="connection" role="status">Open this extension in an Owlbear Rodeo room with Dice+ enabled.</p>
+      <form id="roll-form">
+        <label for="notation">Dice notation</label>
+        <input id="notation" name="notation" value="2d20kh1+5" required maxlength="500" autocomplete="off" spellcheck="false" />
+        <label for="target">Visible to</label>
+        <select id="target" name="target">
+          <option value="everyone">Everyone</option>
+          <option value="self">Only me</option>
+          <option value="dm">GM and me</option>
+          <option value="gm_only">Only the GM</option>
+        </select>
+        <button id="roll" type="submit" disabled>Roll with Dice+</button>
+      </form>
+      <p id="result" role="status" aria-live="polite">Your next roll starts here.</p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

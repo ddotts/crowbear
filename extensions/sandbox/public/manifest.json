@@ -1,0 +1,16 @@
+{
+  "name": "Crowbear Sandbox",
+  "version": "0.1.0",
+  "manifest_version": 1,
+  "description": "A development sandbox for Crowbear's Dice+ integration. Requires Dice+ enabled in the room.",
+  "author": "ddotts",
+  "icon": "./icon.svg",
+  "homepage_url": "https://github.com/ddotts/crowbear",
+  "action": {
+    "title": "Crowbear Sandbox",
+    "icon": "./icon.svg",
+    "popover": "./index.html",
+    "width": 360,
+    "height": 460
+  }
+}
