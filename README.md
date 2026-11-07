@@ -1,8 +1,8 @@
 # Crowbear
 
 A monorepo for independently installable [Owlbear Rodeo](https://www.owlbear.rodeo/)
-extensions. Source lives in the private [ddotts/crowbear](https://github.com/ddotts/crowbear)
-repository; built extensions can be hosted publicly without publishing the source repository.
+extensions. Source lives in the public [ddotts/crowbear](https://github.com/ddotts/crowbear)
+repository; built extensions are hosted on GitHub Pages.
 
 Dice+ is an external extension by Missing Link Dev. Crowbear does not copy or
 replace it. The internal `@crowbear/dice-plus` package provides a typed broadcast
@@ -79,16 +79,9 @@ URL stable once installed.
 
 CI verifies pushes and pull requests. The separate **Deploy extensions** workflow
 is manually triggered on `main`; it deploys only built files to GitHub Pages.
-Pages must first be enabled with the GitHub Actions source in repository settings.
-Private repositories require a [GitHub plan supporting Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages).
-With Pages enabled, the sandbox manifest is
-`https://ddotts.github.io/crowbear/sandbox/manifest.json`.
+Pages uses the GitHub Actions publishing source. Install the sandbox using
+<https://ddotts.github.io/crowbear/sandbox/manifest.json>.
 
-If the account's plan does not support private-repository Pages, deploy `dist/`
-to another public static host, such as Cloudflare Pages. The source repository
-can remain private. No hosting credentials or environment variables are required
-for local development.
-
-After hosting, add the manifest URL to your Owlbear profile, enable the sandbox
+Add the manifest URL to your Owlbear profile, enable the sandbox
 and Dice+ in a room, and roll once to verify the real integration. Local protocol
 tests cannot verify an authenticated Owlbear room or the deployed Dice+ service.
