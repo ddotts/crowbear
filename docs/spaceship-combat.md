@@ -355,8 +355,19 @@ save a backup, or load/paste a JSON file and review it before importing.
 }
 ```
 
-Each collection is optional. Entries replace existing entries with the same ID;
-other entries are retained. Import a ship and its seated crew together. References,
+The import screen defaults to **Replace library**: ships, crew and encounters
+become exactly the collections in the JSON, removing the starter sample set and
+other entries absent from that file. Omitted collections become empty. The
+preview lists how many existing entries will be removed; export a backup first.
+The first imported encounter becomes active, or no encounter is active if none
+is supplied. Its round becomes the shared round (otherwise round 1).
+
+Choose **Merge entries** to retain other existing data while replacing matching
+IDs. Changing mode invalidates the preview, so review it again before importing.
+Older cached clients or direct commands without a mode keep the previous merge
+behavior; the current UI always sends its explicit choice. Both modes are GM-only
+and validate the full result before saving. A validation or persistence failure
+retains the old state. Import a ship and its seated crew together. References,
 unique IDs, legal seats, damage selections and effect configurations are validated
 against the resulting library before saving. IDs use letters, numbers, underscores
 or hyphens. Ship IDs and crew IDs are global within a scene/library; station IDs

@@ -600,6 +600,7 @@ export function execute(
     case "import": {
       gmOnly();
       const library = structuredClone(command.library);
+      const replacing = command.mode === "replace";
       const merge = <T extends { id: string }>(
         existing: T[],
         incoming: T[] = [],
@@ -607,8 +608,12 @@ export function execute(
         ...existing.filter((e) => !incoming.some((i) => i.id === e.id)),
         ...incoming,
       ];
-      const mergedShips = merge(ships, library.ships),
-        mergedCrew = merge(crew, library.crew);
+      const mergedShips = replacing
+          ? (library.ships ?? [])
+          : merge(ships, library.ships),
+        mergedCrew = replacing
+          ? (library.crew ?? [])
+          : merge(crew, library.crew);
       validateFleet(mergedShips, mergedCrew);
       state.shared.ships = mergedShips.filter((s) => s.kind === "Player");
       state.gm.ships = mergedShips.filter((s) => s.kind === "NPC");
@@ -627,7 +632,9 @@ export function execute(
             activateTimers(s, [entry.key], c);
           }
         }
-      state.gm.encounters = merge(state.gm.encounters, library.encounters);
+      state.gm.encounters = replacing
+        ? (library.encounters ?? [])
+        : merge(state.gm.encounters, library.encounters);
       if (
         new Set(state.gm.encounters.map((e) => e.id)).size !==
         state.gm.encounters.length
@@ -636,7 +643,10 @@ export function execute(
       for (const e of state.gm.encounters)
         if (e.shipIds.some((id) => !mergedShips.some((s) => s.id === id)))
           throw new Error(`${e.name}: unknown ship reference.`);
-      if (!state.gm.activeEncounterId && state.gm.encounters.length)
+      if (replacing) {
+        state.gm.activeEncounterId = state.gm.encounters[0]?.id ?? null;
+        state.shared.round = state.gm.encounters[0]?.round ?? 1;
+      } else if (!state.gm.activeEncounterId && state.gm.encounters.length)
         state.gm.activeEncounterId = state.gm.encounters[0].id;
       break;
     }

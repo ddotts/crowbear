@@ -61,6 +61,7 @@ let importText = JSON.stringify(
   2,
 );
 let importPreview: Library | null = null;
+let importMode: "replace" | "merge" = "replace";
 let importError = "";
 let screen = "Encounter";
 let shipId = "kestrel";
@@ -760,7 +761,7 @@ function encounterEditor() {
   return `${heading(freshEncounter ? "New encounter" : "Edit encounter")}<form data-form="encounter" class="encounter-form"><label for="encounter-name">Name</label><input id="encounter-name" name="name" required value="${freshEncounter ? "" : escapeHtml(selected?.name ?? encounterName)}" placeholder="Encounter name"/><h3>Include ships</h3>${ships.map((s) => `<label class="check-row"><input type="checkbox" name="ship" value="${s.id}" ${!freshEncounter && (selected?.shipIds ?? encounterIds).includes(s.id) ? "checked" : ""}/><span><strong>${escapeHtml(s.name)}</strong><small>${s.kind} · ${escapeHtml(s.class)}</small></span></label>`).join("")}<div class="form-actions">${button("Cancel", "nav", 'data-value="Encounters"')}<button class="primary">${freshEncounter ? "Create" : "Save"} encounter</button></div></form>`;
 }
 function importScreen() {
-  return `${heading("Library JSON", button("Export", "export"))}<p class="context">Import or replace entries by ID. Player ships and crew go to this scene; NPCs and encounters stay in this GM browser.</p><label for="import-file">Open JSON file</label><input id="import-file" type="file" accept="application/json,.json"/><label for="json">Or paste JSON</label><textarea id="json" rows="9" spellcheck="false">${escapeHtml(importText)}</textarea><div class="toolbar">${button("Preview import", "preview-json", 'class="primary"')}${button("Example JSON", "sample-json")}</div><div id="import-result" role="status">${importError ? `<p class="error">${escapeHtml(importError)}</p>` : importPreview ? `<p>${importPreview.ships?.length ?? 0} ships · ${importPreview.crew?.length ?? 0} crew · ${importPreview.encounters?.length ?? 0} encounters</p><p class="context">Matching IDs replace existing entries. All references and assignments are validated together before saving.</p>${button("Import library", "import-library", 'class="primary"')}` : ""}</div>`;
+  return `${heading("Library JSON", button("Export", "export"))}<p class="context">Player ships and crew go to this scene; NPCs and encounters stay in this GM browser. Export a backup before replacing a library.</p><label for="import-mode">Import mode</label><select id="import-mode"><option value="replace" ${importMode === "replace" ? "selected" : ""}>Replace library</option><option value="merge" ${importMode === "merge" ? "selected" : ""}>Merge entries</option></select><label for="import-file">Open JSON file</label><input id="import-file" type="file" accept="application/json,.json"/><label for="json">Or paste JSON</label><textarea id="json" rows="9" spellcheck="false">${escapeHtml(importText)}</textarea><div class="toolbar">${button("Preview import", "preview-json", 'class="primary"')}${button("Example JSON", "sample-json")}</div><div id="import-result" role="status">${importError ? `<p class="error">${escapeHtml(importError)}</p>` : importPreview ? `<p>${importPreview.ships?.length ?? 0} ships · ${importPreview.crew?.length ?? 0} crew · ${importPreview.encounters?.length ?? 0} encounters</p><p class="context">${importMode === "replace" ? `Replaces the entire current library, including starter data. Removes ${ships.filter((s) => !importPreview!.ships?.some((entry) => entry.id === s.id)).length} ships, ${crew.filter((c) => !importPreview!.crew?.some((entry) => entry.id === c.id)).length} crew and ${savedEncounters.filter((e) => !importPreview!.encounters?.some((entry) => entry.id === e.id)).length} encounters absent from this JSON. Omitted collections become empty.` : "Merges entries by ID; matching entries are replaced and other entries are kept."} All references and assignments are validated before saving.</p>${button("Import library", "import-library", 'class="primary"')}` : ""}</div>`;
 }
 app.addEventListener(
   "toggle",
@@ -969,6 +970,11 @@ app.addEventListener("change", async (e) => {
   } else if (input.id === "ship-select") {
     shipId = input.value;
     editing = null;
+    render();
+  } else if (input.id === "import-mode") {
+    importMode = input.value as "replace" | "merge";
+    importPreview = null;
+    importError = "";
     render();
   } else if (input.id === "import-file") {
     const file = input.files?.[0];
@@ -1387,7 +1393,11 @@ app.addEventListener("click", async (e) => {
     case "import-library":
       if (
         importPreview &&
-        (await commit({ op: "import", library: importPreview }))
+        (await commit({
+          op: "import",
+          library: importPreview,
+          mode: importMode,
+        }))
       ) {
         importPreview = null;
         message = "Library imported.";

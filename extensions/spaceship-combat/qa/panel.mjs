@@ -739,6 +739,88 @@ assert.equal(
   "true",
 );
 assert.match(await page.locator(".notice").textContent(), /not refunded/);
+// Replace is the default import mode; sample collections do not survive a new library.
+await page.reload();
+await page.setViewportSize({ width: 400, height: 640 });
+await page.locator(".stats-strip").waitFor();
+await page.getByRole("button", { name: "Import", exact: true }).click();
+assert.equal(await page.locator("#import-mode").inputValue(), "replace");
+await page.getByRole("button", { name: "Example JSON", exact: true }).click();
+const importExample = JSON.parse(await page.locator("#json").inputValue());
+const customShip = importExample.ships[0];
+customShip.id = "custom-ship";
+customShip.name = "Imported ship";
+for (const station of customShip.stations)
+  station.seats = station.seats.map(() => null);
+customShip.stations[0].seats[0] = "custom-crew";
+const customCrew = {
+  ...importExample.crew[0],
+  id: "custom-crew",
+  ship: "custom-ship",
+};
+const importedLibrary = {
+  version: 1,
+  ships: [customShip],
+  crew: [customCrew],
+  encounters: [
+    {
+      id: "custom-encounter",
+      name: "Imported encounter",
+      shipIds: ["custom-ship"],
+      round: 1,
+      turn: 0,
+      currentCrewId: null,
+      running: true,
+    },
+  ],
+};
+await page.locator("#json").fill(JSON.stringify(importedLibrary));
+await page.getByRole("button", { name: "Preview import", exact: true }).click();
+assert.match(
+  await page.locator("#import-result").textContent(),
+  /Removes 3 ships, 5 crew and 1 encounters/,
+);
+await page.locator("#import-mode").selectOption("merge");
+assert.equal(
+  await page
+    .getByRole("button", { name: "Import library", exact: true })
+    .count(),
+  0,
+);
+await page.getByRole("button", { name: "Preview import", exact: true }).click();
+assert.match(
+  await page.locator("#import-result").textContent(),
+  /other entries are kept/,
+);
+await page.locator("#import-mode").selectOption("replace");
+await page.getByRole("button", { name: "Preview import", exact: true }).click();
+await page.locator("#import-result").scrollIntoViewIfNeeded();
+await page.screenshot({ path: "/tmp/crowbear-replace-import-400.png" });
+await page.setViewportSize({ width: 320, height: 560 });
+await page
+  .getByRole("button", { name: "Import library", exact: true })
+  .scrollIntoViewIfNeeded();
+await page.screenshot({ path: "/tmp/crowbear-replace-import-320.png" });
+assert.equal(
+  await page.locator("main").evaluate((el) => el.scrollWidth > el.clientWidth),
+  false,
+);
+await page.getByRole("button", { name: "Import library", exact: true }).click();
+assert.match(await page.locator(".notice").textContent(), /Library imported/);
+await page.getByRole("button", { name: "Ships", exact: true }).click();
+assert.equal(await page.locator("#ship-select option").count(), 1);
+assert.match(await page.locator("#ship-select").textContent(), /Imported ship/);
+await page
+  .getByRole("navigation", { name: "Main navigation" })
+  .getByRole("button", { name: "Crew", exact: true })
+  .click();
+assert.equal(await page.locator(".crew-item").count(), 1);
+await page.getByRole("button", { name: "Saved", exact: true }).click();
+assert.equal(await page.locator(".saved-encounter").count(), 1);
+assert.match(
+  await page.locator(".saved-encounter").textContent(),
+  /Imported encounter/,
+);
 assert.deepEqual(errors, []);
 console.log("Feedback UI flows pass, no errors, no horizontal overflow.");
 await browser.close();

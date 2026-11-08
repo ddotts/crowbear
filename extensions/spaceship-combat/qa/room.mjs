@@ -768,6 +768,78 @@ assert.equal(
   0,
 );
 assert.equal(await player.locator('[data-form="effects"]').count(), 0);
+// A replacement import removes the starter scene fleet and private GM library in every panel.
+await gm.getByRole("button", { name: "Import", exact: true }).click();
+assert.equal(await gm.locator("#import-mode").inputValue(), "replace");
+const replacementLibrary = await page.evaluate(() => {
+  const shared = Object.values(window.metadata)[0];
+  const ship = structuredClone(shared.ships[0]);
+  ship.id = "sdk-ship";
+  ship.name = "Imported SDK ship";
+  for (const station of ship.stations)
+    station.seats = station.seats.map(() => null);
+  ship.stations[0].seats[0] = "sdk-crew";
+  const crew = {
+    ...structuredClone(shared.crew[0]),
+    id: "sdk-crew",
+    ship: ship.id,
+  };
+  return {
+    version: 1,
+    ships: [ship],
+    crew: [crew],
+    encounters: [
+      {
+        id: "sdk-encounter",
+        name: "Imported SDK encounter",
+        shipIds: [ship.id],
+        round: 1,
+        turn: 0,
+        currentCrewId: null,
+        running: true,
+      },
+    ],
+  };
+});
+await gm.locator("#json").fill(JSON.stringify(replacementLibrary));
+await gm.getByRole("button", { name: "Preview import", exact: true }).click();
+await gm.getByRole("button", { name: "Import library", exact: true }).click();
+await gm
+  .locator(".notice")
+  .getByText("Library imported.", { exact: true })
+  .waitFor();
+await page.waitForFunction(
+  () => Object.values(window.metadata)[0].ships[0]?.id === "sdk-ship",
+);
+assert.deepEqual(
+  await page.evaluate(() =>
+    Object.values(window.metadata)[0].ships.map((ship) => ship.id),
+  ),
+  ["sdk-ship"],
+);
+assert.deepEqual(
+  await page.evaluate(() =>
+    Object.values(window.metadata)[0].crew.map((crew) => crew.id),
+  ),
+  ["sdk-crew"],
+);
+const replacedGm = await page.evaluate(() =>
+  JSON.parse(
+    localStorage.getItem("com.ddotts.crowbear.spaceship-combat/gm/qa-room"),
+  ),
+);
+assert.deepEqual(replacedGm.ships, []);
+assert.deepEqual(replacedGm.crew, []);
+assert.equal(replacedGm.encounters.length, 1);
+assert.equal(replacedGm.activeEncounterId, "sdk-encounter");
+for (const panel of [player, second]) {
+  await panel.getByRole("button", { name: "Ships", exact: true }).click();
+  assert.equal(await panel.locator("#ship-select option").count(), 1);
+  assert.match(
+    await panel.locator("#ship-select").textContent(),
+    /Imported SDK ship/,
+  );
+}
 assert.deepEqual(errors, []);
 console.log(
   "SDK room fixture passed: background controller, two-player serialization, private GM storage, scene changes, theme, Dice+ audiences, split rolls, independent cooldown slots, backward initiative, NPC batch/manual totals, tracker scrolling/colours, ammunition concurrency, crew quick actions/status, effect persistence and save errors.",

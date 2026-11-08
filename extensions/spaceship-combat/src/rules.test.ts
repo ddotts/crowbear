@@ -1965,3 +1965,108 @@ describe("paid selections", () => {
     ).toBeTruthy();
   });
 });
+
+describe("replace and merge library imports", () => {
+  const replacement = () => {
+    const ship = structuredClone(sampleShips[0]);
+    ship.id = "custom-ship";
+    ship.name = "Imported ship";
+    for (const station of ship.stations)
+      station.seats = station.seats.map(() => null);
+    ship.stations[0].seats[0] = "custom-crew";
+    const crew = {
+      ...structuredClone(sampleCrew[0]),
+      id: "custom-crew",
+      ship: ship.id,
+    };
+    return librarySchema.parse({
+      version: 1,
+      ships: [ship],
+      crew: [crew],
+      encounters: [
+        {
+          id: "custom-encounter",
+          name: "Imported encounter",
+          shipIds: [ship.id],
+          round: 3,
+          turn: 0,
+          currentCrewId: null,
+          running: true,
+        },
+      ],
+    });
+  };
+  it("replaces ships, crew and encounters, removes starter data and selects the imported encounter", () => {
+    const initial = timedEncounter(),
+      library = replacement();
+    const result = execute(
+      initial,
+      { op: "import", mode: "replace", library },
+      true,
+    ).state;
+    expect(result.shared.ships.map((s) => s.id)).toEqual(["custom-ship"]);
+    expect(result.shared.crew.map((c) => c.id)).toEqual(["custom-crew"]);
+    expect(result.gm.ships).toEqual([]);
+    expect(result.gm.crew).toEqual([]);
+    expect(result.gm.encounters.map((e) => e.id)).toEqual(["custom-encounter"]);
+    expect(result.gm.activeEncounterId).toBe("custom-encounter");
+    expect(result.shared.round).toBe(3);
+    expect(initial.shared.ships[0].id).toBe("kestrel");
+    expect(initial.gm.ships).toHaveLength(2);
+  });
+  it("preserves existing entries only when merge is selected and retains compatibility for old commands", () => {
+    for (const mode of ["merge", undefined] as const) {
+      const result = execute(
+        timedEncounter(),
+        { op: "import", mode, library: replacement() },
+        true,
+      ).state;
+      expect(result.shared.ships.map((s) => s.id)).toEqual([
+        "kestrel",
+        "custom-ship",
+      ]);
+      expect(result.gm.ships).toHaveLength(2);
+      expect(result.shared.crew).toHaveLength(4);
+      expect(result.gm.encounters).toHaveLength(2);
+      expect(result.gm.activeEncounterId).toBe(
+        timedEncounter().gm.activeEncounterId,
+      );
+    }
+  });
+  it("clears omitted collections in replace mode and safely accepts an empty library", () => {
+    const empty = execute(
+      timedEncounter(),
+      { op: "import", mode: "replace", library: { version: 1 } },
+      true,
+    ).state;
+    expect(empty.shared.ships).toEqual([]);
+    expect(empty.shared.crew).toEqual([]);
+    expect(empty.gm.ships).toEqual([]);
+    expect(empty.gm.crew).toEqual([]);
+    expect(empty.gm.encounters).toEqual([]);
+    expect(empty.gm.activeEncounterId).toBeNull();
+    expect(empty.shared.round).toBe(1);
+    const library = replacement();
+    delete library.encounters;
+    const withoutEncounters = execute(
+      timedEncounter(),
+      { op: "import", mode: "replace", library },
+      true,
+    ).state;
+    expect(withoutEncounters.gm.encounters).toEqual([]);
+    expect(withoutEncounters.gm.activeEncounterId).toBeNull();
+  });
+  it("validates replacements atomically and permits only the GM to replace data", () => {
+    const initial = timedEncounter(),
+      before = structuredClone(initial),
+      library = replacement();
+    expect(() =>
+      execute(initial, { op: "import", mode: "replace", library }, false),
+    ).toThrow(/Only the GM/);
+    library.encounters![0].shipIds = ["missing"];
+    expect(() =>
+      execute(initial, { op: "import", mode: "replace", library }, true),
+    ).toThrow(/unknown ship reference/);
+    expect(initial).toEqual(before);
+  });
+});

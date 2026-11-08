@@ -464,7 +464,11 @@ export const commandSchema = z.discriminatedUnion("op", [
   z.object({ op: z.literal("pause") }),
   z.object({ op: z.literal("next") }),
   z.object({ op: z.literal("previous") }),
-  z.object({ op: z.literal("import"), library: librarySchema }),
+  z.object({
+    op: z.literal("import"),
+    library: librarySchema,
+    mode: z.enum(["replace", "merge"]).optional(),
+  }),
 ]);
 export type Command = z.infer<typeof commandSchema>;
 function unique(ids: string[], label: string) {
