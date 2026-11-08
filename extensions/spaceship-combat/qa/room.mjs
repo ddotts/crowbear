@@ -33,7 +33,7 @@ window.addEventListener('message',event=>{
  case 'OBR_PLAYER_GET_NAME':response={name:client.user};break;
  case 'OBR_SCENE_IS_READY':response={ready:window.sceneReady};break;
  case 'OBR_SCENE_GET_METADATA':response={metadata:window.metadata};break;
- case 'OBR_SCENE_SET_METADATA':if(window.failSave){error='Simulated scene save failure';break;}Object.assign(window.metadata,m.data.update);emit('OBR_SCENE_METADATA_EVENT_CHANGE',{metadata:window.metadata});break;
+ case 'OBR_SCENE_SET_METADATA':if(window.failSave){error=typeof window.failSave==='object'?window.failSave:'Simulated scene save failure';break;}Object.assign(window.metadata,m.data.update);emit('OBR_SCENE_METADATA_EVENT_CHANGE',{metadata:window.metadata});break;
  case 'OBR_PARTY_GET_PLAYERS':response={players:[...new Map(clients.filter(c=>c.connection!==client.connection).map(c=>[c.connection,{id:c.user,connectionId:c.connection,role:c.role}])).values()]};break;
  case 'OBR_THEME_GET_THEME':response={theme:{mode:'DARK',primary:{main:'#bb99ff',contrastText:'#25143d',light:'#ddccff',dark:'#8855cc'},secondary:{main:'#ffcc88',contrastText:'#000',light:'#ffeedd',dark:'#bb8844'},background:{default:'#18181f',paper:'#252530'},text:{primary:'#eeeeee',secondary:'#b7b5c2',disabled:'#777'}}};break;
  case 'OBR_BROADCAST_SUBSCRIBE':client.channels.add(m.data.channel);break;
@@ -51,7 +51,7 @@ window.addEventListener('message',event=>{
  if(m.nonce)send(client,m.id+(error?'_ERROR':'_RESPONSE')+m.nonce,error??response);
 });
 for(const [name,connection,user,role,background] of [['gm-background','gm-tab','gm-user','GM',true],['gm','gm-tab','gm-user','GM',false],['player','player-tab','player-user','PLAYER',false],['player-two','player-two-tab','player-two-user','PLAYER',false]]){
- const frame=document.createElement('iframe');frame.name=name;frame.style=background?'display:none':'width:400px;height:640px;border:0;border-radius:12px;';
+ const frame=document.createElement('iframe');frame.name=name;frame.allow='clipboard-write';frame.style=background?'display:none':'width:400px;height:640px;border:0;border-radius:12px;';
  const client={frame,connection,user,role,channels:new Set()};clients.push(client);
  frame.src=appBase+(background?'background.html':'')+'?obrref='+encodeURIComponent(btoa(origin+' qa-room'));
  frame.onload=()=>send(client,'OBR_READY',{ref:name,userId:user});document.body.append(frame);
@@ -445,6 +445,10 @@ await gm
   .locator(".notice")
   .getByText("Private storage full", { exact: true })
   .waitFor();
+assert.equal(
+  JSON.parse(await gm.locator("#save-diagnostic-report").inputValue()).stage,
+  "save GM browser storage",
+);
 await background.evaluate(() => {
   Storage.prototype.setItem = window.originalSetItem;
 });
@@ -803,6 +807,74 @@ const replacementLibrary = await page.evaluate(() => {
 });
 await gm.locator("#json").fill(JSON.stringify(replacementLibrary));
 await gm.getByRole("button", { name: "Preview import", exact: true }).click();
+await page.evaluate(
+  () =>
+    (window.failSave = {
+      name: "SDKSaveError",
+      message: "Fixture structured scene save failure",
+      code: "FIXTURE_SCENE_SAVE",
+    }),
+);
+await gm.getByRole("button", { name: "Import library", exact: true }).click();
+await gm
+  .locator(".notice")
+  .getByText("Fixture structured scene save failure [FIXTURE_SCENE_SAVE]", {
+    exact: true,
+  })
+  .waitFor();
+const reportText = await gm.locator("#save-diagnostic-report").inputValue();
+const report = JSON.parse(reportText);
+assert.equal(report.stage, "save Owlbear scene metadata");
+assert.equal(report.operation, "import");
+assert.equal(report.importMode, "replace");
+assert.equal(report.rollback, "GM browser storage restored");
+assert.equal(report.errorType, "SDKSaveError");
+assert.match(report.error, /FIXTURE_SCENE_SAVE/);
+assert.ok(
+  report.commandBytes > 0 &&
+    report.sharedBytes > 0 &&
+    report.metadataUpdateBytes > report.sharedBytes &&
+    report.gmBytes > 0,
+);
+assert.deepEqual(report.importCounts, { ships: 1, crew: 1, encounters: 1 });
+assert.equal(reportText.includes("SECRET NPC"), false);
+assert.equal(reportText.includes("stations"), false);
+await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+await gm.getByRole("button", { name: "Copy diagnostics", exact: true }).click();
+await gm
+  .locator(".notice")
+  .getByText("Diagnostics copied.", { exact: true })
+  .waitFor();
+assert.equal(
+  await page.evaluate(() => navigator.clipboard.readText()),
+  reportText,
+);
+await page.screenshot({ path: "/tmp/crowbear-import-diagnostics-room.png" });
+await page
+  .locator('iframe[name="gm"]')
+  .screenshot({ path: "/tmp/crowbear-import-diagnostics-400.png" });
+await page.locator('iframe[name="gm"]').evaluate((frame) => {
+  frame.style.width = "320px";
+  frame.style.height = "560px";
+});
+await gm
+  .getByRole("button", { name: "Copy diagnostics", exact: true })
+  .scrollIntoViewIfNeeded();
+await page
+  .locator('iframe[name="gm"]')
+  .screenshot({ path: "/tmp/crowbear-import-diagnostics-320.png" });
+assert.equal(
+  await gm.locator("main").evaluate((el) => el.scrollWidth > el.clientWidth),
+  false,
+);
+await page.locator('iframe[name="gm"]').evaluate((frame) => {
+  frame.style.width = "400px";
+  frame.style.height = "640px";
+});
+console.log(
+  "Structured SDK import failures retain stage, payload sizes, cause, rollback and copyable diagnostics.",
+);
+await page.evaluate(() => (window.failSave = false));
 await gm.getByRole("button", { name: "Import library", exact: true }).click();
 await gm
   .locator(".notice")
@@ -811,6 +883,7 @@ await gm
 await page.waitForFunction(
   () => Object.values(window.metadata)[0].ships[0]?.id === "sdk-ship",
 );
+assert.equal(await gm.locator("#save-diagnostic-report").count(), 0);
 assert.deepEqual(
   await page.evaluate(() =>
     Object.values(window.metadata)[0].ships.map((ship) => ship.id),

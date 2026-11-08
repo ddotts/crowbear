@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { diagnosticSchema } from "./diagnostics";
 export const KEY = "com.ddotts.crowbear.spaceship-combat/state";
 export const REQUEST = "com.ddotts.crowbear.spaceship-combat/request";
 export const RESPONSE = "com.ddotts.crowbear.spaceship-combat/response";
@@ -65,6 +66,7 @@ export const replySchema = z.object({
   id: z.string(),
   sessionId: z.string(),
   error: z.string().optional(),
+  diagnostic: diagnosticSchema.optional(),
   notice: z.string().optional(),
   selectionId: z.string().uuid().optional(),
   roll: z

@@ -58,6 +58,20 @@ and form controls are excluded.
   if the scene save fails; browser and Owlbear storage cannot form one atomic
   transaction if the browser closes midway through a save.
 
+Failed saves open **Save diagnostics**, with **Copy diagnostics** and a selectable
+report for manual copying. The report records the failing stage (request,
+validation, GM browser storage, Owlbear scene metadata or acknowledgement), SDK
+error message/code, extension version, UTC time, request ID, UTF-8 command/state
+byte counts, import mode/counts and rollback outcome. It does not include the
+imported library or ship/crew JSON. Private-store byte counts and import summaries
+are only returned to the GM. Clipboard-write permission is used only when the
+user clicks Copy diagnostics; copying can fall back to selecting the report.
+Structured SDK errors are preserved rather than replaced by a generic save error.
+A failed rollback is recorded alongside the original failure, so it does not hide
+the initial SDK error. Reports clear after a successful new command or scene/role
+change. To investigate an import failure, retry once and share that report before
+making further changes.
+
 Shared metadata and Owlbear broadcasts are cooperative extension resources, not
 an authentication boundary against arbitrary other extensions. Private NPC data
 is kept out of those resources; the supplied demo NPCs are public sample assets.
@@ -366,8 +380,9 @@ Choose **Merge entries** to retain other existing data while replacing matching
 IDs. Changing mode invalidates the preview, so review it again before importing.
 Older cached clients or direct commands without a mode keep the previous merge
 behavior; the current UI always sends its explicit choice. Both modes are GM-only
-and validate the full result before saving. A validation or persistence failure
-retains the old state. Import a ship and its seated crew together. References,
+and validate the full result before saving. Validation failures leave the old
+state untouched; persistence failures attempt to restore the GM store and report
+the rollback outcome. Import a ship and its seated crew together. References,
 unique IDs, legal seats, damage selections and effect configurations are validated
 against the resulting library before saving. IDs use letters, numbers, underscores
 or hyphens. Ship IDs and crew IDs are global within a scene/library; station IDs

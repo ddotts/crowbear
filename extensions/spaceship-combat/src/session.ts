@@ -1,6 +1,12 @@
 import { createDicePlusClient } from "@crowbear/dice-plus";
 import OBR from "@owlbear-rodeo/sdk";
 import { allData, execute, type State } from "./commands";
+import {
+  CommandError,
+  describeError,
+  jsonBytes,
+  makeDiagnostic,
+} from "./diagnostics";
 import { type Crew, randomInitiative, type Ship } from "./rules";
 import { crew, ships } from "./sample-data";
 import {
@@ -172,10 +178,7 @@ export function createSession(update: (view: ViewState) => void) {
         encounters: [],
         activeEncounterId: null,
         role: actualRole,
-        status:
-          error instanceof Error
-            ? error.message
-            : "Could not load stored data.",
+        status: describeError(error),
         ready: false,
       };
       update(live);
@@ -210,7 +213,10 @@ export function createSession(update: (view: ViewState) => void) {
         if (!request) return;
         clearTimeout(request.timer);
         pending.delete(parsed.data.id);
-        if (parsed.data.error) request.reject(new Error(parsed.data.error));
+        if (parsed.data.error)
+          request.reject(
+            new CommandError(parsed.data.error, parsed.data.diagnostic),
+          );
         else request.resolve(parsed.data);
       });
       OBR.scene.onMetadataChange((metadata) => {
@@ -264,8 +270,17 @@ export function createSession(update: (view: ViewState) => void) {
         const timer = setTimeout(() => {
           pending.delete(id);
           reject(
-            new Error(
+            new CommandError(
               "GM did not acknowledge this change. It may have saved; refresh and inspect before retrying.",
+              makeDiagnostic(
+                {
+                  operation: command.op,
+                  stage: "wait for GM acknowledgement",
+                  requestId: id,
+                  commandBytes: jsonBytes(command),
+                },
+                "No response within 15 seconds",
+              ),
             ),
           );
         }, 15000);
@@ -281,7 +296,20 @@ export function createSession(update: (view: ViewState) => void) {
         })().catch((error) => {
           clearTimeout(timer);
           pending.delete(id);
-          reject(error);
+          reject(
+            new CommandError(
+              "Could not send the change to the GM.",
+              makeDiagnostic(
+                {
+                  operation: command.op,
+                  stage: "send command",
+                  requestId: id,
+                  commandBytes: jsonBytes(command),
+                },
+                error,
+              ),
+            ),
+          );
         });
       },
     );

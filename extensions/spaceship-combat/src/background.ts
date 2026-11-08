@@ -1,6 +1,12 @@
 import OBR from "@owlbear-rodeo/sdk";
 import { z } from "zod";
 import { execute } from "./commands";
+import {
+  type DiagnosticContext,
+  describeError,
+  jsonBytes,
+  makeDiagnostic,
+} from "./diagnostics";
 import { ships as sampleShips, crew as samplesCrew } from "./sample-data";
 import {
   commandSchema,
@@ -167,12 +173,29 @@ if (OBR.isAvailable)
               id: assembled.id,
               sessionId: shared.sessionId,
             };
+            const diagnostic: DiagnosticContext = {
+              operation: request.success ? request.data.command.op : "unknown",
+              stage: "validate request",
+              requestId: assembled.id,
+              revision: shared.revision,
+            };
             try {
               if (!request.success) throw new Error("Invalid command data.");
+              diagnostic.commandBytes = jsonBytes(request.data.command);
+              if (isGM && request.data.command.op === "import") {
+                const command = request.data.command;
+                diagnostic.importMode = command.mode ?? "merge";
+                diagnostic.importCounts = {
+                  ships: command.library.ships?.length ?? 0,
+                  crew: command.library.crew?.length ?? 0,
+                  encounters: command.library.encounters?.length ?? 0,
+                };
+              }
               if (request.data.sessionId !== shared.sessionId)
                 throw new Error(
                   "The scene changed. Refresh before making another change.",
                 );
+              diagnostic.stage = "check connected players";
               const freshParty = await OBR.party.getPlayers();
               if (
                 !isGM &&
@@ -185,29 +208,47 @@ if (OBR.isAvailable)
                 throw new Error(
                   "Only this GM's local panel or a connected player can submit changes.",
                 );
+              diagnostic.stage = "read GM browser storage";
               const before = getGm();
+              diagnostic.stage = "validate and apply command";
               const result = execute(
                 { shared, gm: before },
                 request.data.command,
                 isGM,
               );
+              diagnostic.sharedBytes = jsonBytes(result.state.shared);
+              diagnostic.metadataUpdateBytes = jsonBytes({
+                [KEY]: result.state.shared,
+              });
+              if (isGM) diagnostic.gmBytes = jsonBytes(result.state.gm);
+              diagnostic.stage = "check scene before saving";
               if (ticket !== generation || !(await OBR.scene.isReady()))
                 throw new Error(
                   "Scene changed before saving. Refresh and try again.",
                 );
+              diagnostic.stage = "save GM browser storage";
               if (result.gmChanged)
                 localStorage.setItem(localKey, JSON.stringify(result.state.gm));
               try {
                 if (result.publicChanged) {
+                  diagnostic.stage = "save Owlbear scene metadata";
                   if (ticket !== generation)
                     throw new Error("Scene changed before saving.");
                   await OBR.scene.setMetadata({ [KEY]: result.state.shared });
                 }
               } catch (error) {
-                if (result.gmChanged)
-                  localStorage.setItem(localKey, JSON.stringify(before));
+                if (result.gmChanged) {
+                  try {
+                    localStorage.setItem(localKey, JSON.stringify(before));
+                    diagnostic.rollback = "GM browser storage restored";
+                  } catch (rollbackError) {
+                    diagnostic.rollback = `GM browser storage rollback failed: ${describeError(rollbackError)}`;
+                  }
+                } else
+                  diagnostic.rollback = "No GM browser storage change to undo";
                 throw error;
               }
+              diagnostic.stage = "prepare command response";
               if (ticket === generation) shared = result.state.shared;
               if (
                 result.roll &&
@@ -224,12 +265,8 @@ if (OBR.isAvailable)
                 roll: result.roll,
               };
             } catch (error) {
-              response.error =
-                error instanceof Error
-                  ? error.message
-                  : typeof error === "string"
-                    ? error
-                    : "Could not save the change.";
+              response.error = describeError(error);
+              response.diagnostic = makeDiagnostic(diagnostic, error);
             }
             replies.set(cacheKey, response);
             if (replies.size > 200)

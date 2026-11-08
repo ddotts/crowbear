@@ -2,6 +2,12 @@ import "@fontsource/roboto/latin-400.css";
 import "@fontsource/roboto/latin-500.css";
 import "@fontsource/roboto/latin-700.css";
 import OBR, { type Theme } from "@owlbear-rodeo/sdk";
+import {
+  CommandError,
+  describeError,
+  makeDiagnostic,
+  type SaveDiagnostic,
+} from "./diagnostics";
 import { markdown } from "./markdown";
 import {
   type Action,
@@ -87,6 +93,7 @@ let rollMenu: {
   activation: boolean;
 } | null = null;
 let message = "";
+let saveDiagnostic: SaveDiagnostic | null = null;
 let editing:
   | {
       kind: "selection";
@@ -293,6 +300,11 @@ function shipSnapshot(s: Ship, c?: Crew) {
     })
     .join("")}</span></summary>${effectList(s, key)}</details></section>`;
 }
+function diagnosticPanel() {
+  return saveDiagnostic
+    ? `<details class="save-diagnostics" open><summary>Save diagnostics · ${escapeHtml(saveDiagnostic.stage)}</summary><label for="save-diagnostic-report">Copy this report to diagnose the failed change</label><textarea id="save-diagnostic-report" readonly rows="8" spellcheck="false">${escapeHtml(JSON.stringify(saveDiagnostic, null, 2))}</textarea>${button("Copy diagnostics", "copy-diagnostics")}</details>`
+    : "";
+}
 function render() {
   const view = `${screen}:${shipId}:${section}`;
   const sameView = view === renderedView;
@@ -334,7 +346,7 @@ function render() {
           ["My ships", "Ships"],
           ["My crew", "Crew"],
         ];
-  app.innerHTML = `<header class="topbar"><strong>↗ Spaceship combat</strong><label class="sr-only" for="role">Preview role</label><select id="role" ${OBR.isAvailable ? "disabled" : ""}><option ${role === "GM" ? "selected" : ""}>GM</option><option ${role === "Player" ? "selected" : ""}>Player</option></select></header><nav class="main-nav" aria-label="Main navigation">${nav.map(([value, label]) => button(label, "nav", `data-value="${value}" aria-current="${screen === value ? "page" : "false"}"`)).join("")}</nav><div class="connection-status ${connected ? "" : "disconnected"}" role="status">${escapeHtml(connectionStatus)}${button("↻", "refresh", 'aria-label="Refresh state"')}</div><main ${busy ? "inert" : ""}>${screen === "My actions" ? quickActions() : screen === "Edit encounter" ? encounterEditor() : screen === "Encounter" ? encounter() : screen === "Ships" || screen === "My ships" ? fleet() : screen === "Crew" || screen === "My crew" ? crewScreen() : screen === "Encounters" ? encounters() : importScreen()}</main><div class="notice" role="status">${escapeHtml(message)}</div><footer><span>${OBR.isAvailable ? "Owlbear" : "Demo"} · ${busy ? "Working…" : role === "GM" ? "GM rolls private" : "Player rolls public"}</span>${!OBR.isAvailable ? `<label class="sr-only" for="theme-mode">Preview theme</label><select id="theme-mode" aria-label="Preview theme">${["system", "light", "dark"].map((mode) => `<option value="${mode}" ${mode === themePreference ? "selected" : ""}>${mode[0].toUpperCase() + mode.slice(1)}</option>`).join("")}</select>` : ""}${!OBR.isAvailable ? button("Reset", "reset") : ""}</footer>`;
+  app.innerHTML = `<header class="topbar"><strong>↗ Spaceship combat</strong><label class="sr-only" for="role">Preview role</label><select id="role" ${OBR.isAvailable ? "disabled" : ""}><option ${role === "GM" ? "selected" : ""}>GM</option><option ${role === "Player" ? "selected" : ""}>Player</option></select></header><nav class="main-nav" aria-label="Main navigation">${nav.map(([value, label]) => button(label, "nav", `data-value="${value}" aria-current="${screen === value ? "page" : "false"}"`)).join("")}</nav><div class="connection-status ${connected ? "" : "disconnected"}" role="status">${escapeHtml(connectionStatus)}${button("↻", "refresh", 'aria-label="Refresh state"')}</div><main ${busy ? "inert" : ""}>${screen === "My actions" ? quickActions() : screen === "Edit encounter" ? encounterEditor() : screen === "Encounter" ? encounter() : screen === "Ships" || screen === "My ships" ? fleet() : screen === "Crew" || screen === "My crew" ? crewScreen() : screen === "Encounters" ? encounters() : importScreen()}${diagnosticPanel()}</main><div class="notice" role="status">${escapeHtml(message)}</div><footer><span>${OBR.isAvailable ? "Owlbear" : "Demo"} · ${busy ? "Working…" : role === "GM" ? "GM rolls private" : "Player rolls public"}</span>${!OBR.isAvailable ? `<label class="sr-only" for="theme-mode">Preview theme</label><select id="theme-mode" aria-label="Preview theme">${["system", "light", "dark"].map((mode) => `<option value="${mode}" ${mode === themePreference ? "selected" : ""}>${mode[0].toUpperCase() + mode.slice(1)}</option>`).join("")}</select>` : ""}${!OBR.isAvailable ? button("Reset", "reset") : ""}</footer>`;
   const main = app.querySelector("main");
   if (main) main.scrollTop = scroll;
   const tracker = app.querySelector<HTMLElement>(".crew-order");
@@ -793,6 +805,7 @@ app.addEventListener(
 const session = createSession((view) => {
   if (sceneSession !== view.sessionId) {
     sceneSession = view.sessionId;
+    saveDiagnostic = null;
     editing = null;
     rollMenu = null;
     inspectedCrewId = null;
@@ -805,6 +818,7 @@ const session = createSession((view) => {
   savedEncounters = view.encounters;
   if (activeEncounterId !== view.activeEncounterId) inspectedCrewId = null;
   activeEncounterId = view.activeEncounterId;
+  if (role !== view.role) saveDiagnostic = null;
   role = view.role;
   connected = view.ready;
   connectionStatus = view.status;
@@ -841,6 +855,7 @@ const session = createSession((view) => {
   render();
 });
 async function commit(command: Command) {
+  saveDiagnostic = null;
   busy = true;
   render();
   try {
@@ -848,17 +863,28 @@ async function commit(command: Command) {
     message = result.notice || "Saved.";
     return true;
   } catch (error) {
-    message =
-      error instanceof Error ? error.message : "Could not save the change.";
+    message = describeError(error);
+    saveDiagnostic =
+      error instanceof CommandError && error.diagnostic
+        ? error.diagnostic
+        : makeDiagnostic(
+            { operation: command.op, stage: "panel command" },
+            error,
+          );
     return false;
   } finally {
     busy = false;
     render();
+    if (saveDiagnostic)
+      app
+        .querySelector(".save-diagnostics")
+        ?.scrollIntoView({ block: "nearest" });
   }
 }
 async function performSelection(
   command: Extract<Command, { op: "activate-selection" | "selection-preview" }>,
 ) {
+  saveDiagnostic = null;
   busy = true;
   render();
   try {
@@ -872,20 +898,34 @@ async function performSelection(
     };
     message = result.notice;
   } catch (error) {
-    message =
-      error instanceof Error ? error.message : "Could not activate action.";
+    message = describeError(error);
+    saveDiagnostic =
+      error instanceof CommandError && error.diagnostic
+        ? error.diagnostic
+        : makeDiagnostic(
+            { operation: command.op, stage: "activate action" },
+            error,
+          );
   } finally {
     busy = false;
     render();
   }
 }
 async function performRoll(command: Command) {
+  saveDiagnostic = null;
   busy = true;
   render();
   try {
     message = await session.roll(command);
   } catch (error) {
-    message = error instanceof Error ? error.message : "Could not roll.";
+    message = describeError(error);
+    saveDiagnostic =
+      error instanceof CommandError && error.diagnostic
+        ? error.diagnostic
+        : makeDiagnostic(
+            { operation: command.op, stage: "roll preparation" },
+            error,
+          );
   } finally {
     busy = false;
     render();
@@ -1090,6 +1130,21 @@ app.addEventListener("click", async (e) => {
   const value = b.dataset.value ?? "";
   message = "";
   switch (b.dataset.action) {
+    case "copy-diagnostics":
+      if (saveDiagnostic) {
+        try {
+          await navigator.clipboard.writeText(
+            JSON.stringify(saveDiagnostic, null, 2),
+          );
+          message = "Diagnostics copied.";
+        } catch {
+          app
+            .querySelector<HTMLTextAreaElement>("#save-diagnostic-report")
+            ?.select();
+          message = "Copy unavailable. Select the report and copy it manually.";
+        }
+      }
+      break;
     case "nav":
       screen = value;
       editing = null;

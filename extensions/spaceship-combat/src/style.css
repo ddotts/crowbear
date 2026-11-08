@@ -1515,3 +1515,23 @@ button.action-name {
 .category-menu strong {
   font-size: 10px;
 }
+.save-diagnostics {
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  background: var(--surface);
+}
+.save-diagnostics summary {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.save-diagnostics label {
+  font-size: 10px;
+  margin-top: 7px;
+}
+.save-diagnostics textarea {
+  font: 10px / 1.4 monospace;
+  resize: vertical;
+  min-height: 100px;
+}
