@@ -28,10 +28,11 @@ describe("Owlbear manifest URLs", () => {
           : `${pagesBase.origin}${path}`;
         const resolved = new URL(clientUrl);
         expect(resolved.origin).toBe(pagesBase.origin);
+        expect(resolved.searchParams.get("v")).toBe(source.version);
         expect(resolved.pathname).toMatch(new RegExp(`^/crowbear/${slug}/`));
       }
       expect(manifest.action.popover).toBe(
-        `https://ddotts.github.io/crowbear/${slug}/index.html`,
+        `https://ddotts.github.io/crowbear/${slug}/index.html?v=${source.version}`,
       );
       expect(source.action.popover).toBe("/index.html");
       expect(
@@ -39,7 +40,7 @@ describe("Owlbear manifest URLs", () => {
       ).toBe("/index.html");
       if (slug === "spaceship-combat")
         expect(manifest.background_url).toBe(
-          "https://ddotts.github.io/crowbear/spaceship-combat/background.html",
+          `https://ddotts.github.io/crowbear/spaceship-combat/background.html?v=${source.version}`,
         );
     });
   }

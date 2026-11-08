@@ -12,6 +12,7 @@ export function hostedManifest(manifest, slug) {
       url.href.startsWith(base.href),
       "Manifest path escapes extension",
     );
+    url.searchParams.set("v", manifest.version);
     return url.href;
   };
   hosted.icon = resolve(hosted.icon);

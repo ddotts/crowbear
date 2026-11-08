@@ -17,6 +17,8 @@ extension. There is no npm publication step: Owlbear installs a hosted manifest.
   produced `https://ddotts.github.io./index.html`, losing the repository path
   and breaking both the icon and iframe. Keep bundled HTML assets relative;
   deployed manifest resources must be absolute and include the extension path.
+  Each published resource also carries a `?v=<extension-version>` query so updated
+  installations fetch new HTML and icons rather than cached entrypoints.
 - Each package supplies `dev`, `typecheck`, and `build` scripts. Root recursive
   commands run the corresponding scripts across all extensions.
 - `scripts/assemble.mjs` copies extension builds into `dist/<slug>/` after a
