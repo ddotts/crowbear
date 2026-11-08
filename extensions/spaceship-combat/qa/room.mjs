@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+import { loadLegacyFixture } from "./legacy-fixture.mjs";
 
 // An SDK host fixture, not an Owlbear or Dice+ service substitute. It exercises
 // the real installed SDK, background iframe, GM panel and two player panels.
@@ -73,6 +74,33 @@ await player
   .locator(".connection-status")
   .getByText("Scene connected", { exact: false })
   .waitFor();
+await page.waitForFunction(
+  () => Object.values(window.metadata)[0]?.ships[0]?.id === "naranja-mecanica",
+);
+assert.equal(
+  await page.evaluate(() => Object.values(window.metadata)[0].crew.length),
+  6,
+);
+await gm.getByRole("button", { name: "Import", exact: true }).click();
+await gm
+  .getByRole("button", { name: "Replace with Naranja preset", exact: true })
+  .click();
+await gm
+  .locator(".notice")
+  .getByText("Naranja preset loaded.", { exact: true })
+  .waitFor();
+const presetGm = await page.evaluate(() =>
+  JSON.parse(
+    localStorage.getItem("com.ddotts.crowbear.spaceship-combat/gm/qa-room"),
+  ),
+);
+assert.equal(presetGm.ships.length, 3);
+assert.equal(presetGm.crew.length, 7);
+assert.equal(presetGm.encounters[0].running, false);
+await page
+  .locator('iframe[name="gm"]')
+  .screenshot({ path: "/tmp/crowbear-naranja-preset-room.png" });
+await loadLegacyFixture(gm);
 await player
   .getByRole("button", { name: "Ships", exact: true })
   .first()
@@ -772,6 +800,7 @@ assert.equal(
   0,
 );
 assert.equal(await player.locator('[data-form="effects"]').count(), 0);
+await loadLegacyFixture(gm);
 // A replacement import removes the starter scene fleet and private GM library in every panel.
 await gm.getByRole("button", { name: "Import", exact: true }).click();
 assert.equal(await gm.locator("#import-mode").inputValue(), "replace");

@@ -464,6 +464,7 @@ export const commandSchema = z.discriminatedUnion("op", [
   z.object({ op: z.literal("pause") }),
   z.object({ op: z.literal("next") }),
   z.object({ op: z.literal("previous") }),
+  z.object({ op: z.literal("load-defaults") }),
   z.object({
     op: z.literal("import"),
     library: librarySchema,

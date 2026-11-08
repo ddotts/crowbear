@@ -1,3 +1,4 @@
+import { defaultLibrary } from "./defaults";
 import {
   actionRolls,
   activateEffect,
@@ -47,6 +48,10 @@ export function execute(
   isGM: boolean,
   rng = randomInitiative,
 ) {
+  if (command.op === "load-defaults") {
+    if (!isGM) throw new Error("Only the GM can do this.");
+    command = { op: "import", mode: "replace", library: defaultLibrary() };
+  }
   const state = structuredClone(current);
   const { ships, crew } = allData(state);
   const vessel = (id: string): Ship => {

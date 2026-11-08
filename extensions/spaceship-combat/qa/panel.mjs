@@ -1,11 +1,26 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+import { loadLegacyFixture } from "./legacy-fixture.mjs";
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 400, height: 640 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.CROWBEAR_QA_URL ?? "http://127.0.0.1:5174");
+await page.locator(".initiative-entry").first().waitFor();
+assert.equal(await page.locator(".initiative-entry").count(), 13);
+assert.match(await page.locator("main").innerText(), /Debt Collection/);
+await page.screenshot({ path: "/tmp/crowbear-naranja-default.png" });
+await page.getByRole("button", { name: "Import", exact: true }).click();
+await page
+  .getByRole("button", { name: "Replace with Naranja preset", exact: true })
+  .click();
+await page
+  .locator(".notice")
+  .getByText("Naranja preset loaded.", { exact: true })
+  .waitFor();
+await page.screenshot({ path: "/tmp/crowbear-naranja-preset.png" });
+await loadLegacyFixture(page);
 await page.waitForSelector(".stats-strip");
 await page.screenshot({ path: "/tmp/crowbear-feedback-light.png" });
 await page.getByRole("button", { name: "Damage Engines", exact: true }).click();
@@ -209,6 +224,7 @@ await page.screenshot({ path: "/tmp/crowbear-status-effects-light.png" });
 
 // Ammunition is shared by name on a ship; Autonomy is available in both views.
 await page.reload();
+await loadLegacyFixture(page);
 await page.setViewportSize({ width: 400, height: 640 });
 await page.locator(".stats-strip").waitFor();
 const autonomy = page.getByRole("meter", {
@@ -361,6 +377,7 @@ await page.locator("main").evaluate((el) => (el.scrollTop = 0));
 await page.screenshot({ path: "/tmp/crowbear-initiative-colours.png" });
 // Typed/timed effects, requirements, removal, Gs and compact station saves.
 await page.reload();
+await loadLegacyFixture(page);
 await page.setViewportSize({ width: 400, height: 640 });
 await page.locator(".stats-strip").waitFor();
 await page.locator("#role").selectOption("Player");
@@ -522,6 +539,7 @@ assert.equal(
 assert.equal(await saving.getAttribute("aria-disabled"), "false");
 // Named pools update sibling actions; metadata stays visible through description toggles.
 await page.reload();
+await loadLegacyFixture(page);
 await page.setViewportSize({ width: 400, height: 640 });
 await page.locator(".stats-strip").waitFor();
 await page.locator("#role").selectOption("Player");
@@ -594,6 +612,7 @@ await page.locator("#theme-mode").selectOption("dark");
 await page.screenshot({ path: "/tmp/crowbear-save-buttons-dark-320.png" });
 // Grant effects through an explicit target selector, then preview/force damage CAT.
 await page.reload();
+await loadLegacyFixture(page);
 await page.setViewportSize({ width: 400, height: 640 });
 await page.locator(".stats-strip").waitFor();
 await page.locator("#role").selectOption("Player");
@@ -670,6 +689,7 @@ assert.equal(
 assert.match(await categoryDamage.textContent(), /CAT1/);
 // Cancelling either selector preserves paid resources and unfinished selections can resume.
 await page.reload();
+await loadLegacyFixture(page);
 await page.setViewportSize({ width: 400, height: 640 });
 await page.locator(".stats-strip").waitFor();
 await page.getByRole("button", { name: "Damage Weapons", exact: true }).click();
@@ -741,6 +761,7 @@ assert.equal(
 assert.match(await page.locator(".notice").textContent(), /not refunded/);
 // Replace is the default import mode; sample collections do not survive a new library.
 await page.reload();
+await loadLegacyFixture(page);
 await page.setViewportSize({ width: 400, height: 640 });
 await page.locator(".stats-strip").waitFor();
 await page.getByRole("button", { name: "Import", exact: true }).click();

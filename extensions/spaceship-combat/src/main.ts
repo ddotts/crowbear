@@ -70,9 +70,9 @@ let importPreview: Library | null = null;
 let importMode: "replace" | "merge" = "replace";
 let importError = "";
 let screen = "Encounter";
-let shipId = "kestrel";
+let shipId = "";
 let section = "Status";
-let encounterName = "Ambush at the relay";
+let encounterName = "";
 let encounterIds = ships.map((s) => s.id);
 let running = true;
 let round = 1;
@@ -82,7 +82,7 @@ let encounterView = "actions";
 let renderedActiveCrew: string | null = null;
 let renderedRound = 0;
 let renderedInitiativeOrder = "";
-let selectedCrewId = "mara";
+let selectedCrewId = "";
 let rollMenu: {
   shipId: string;
   stationId: string;
@@ -149,6 +149,7 @@ const mutationButtons = new Set([
   "new-encounter",
   "open-encounter",
   "import-library",
+  "load-defaults",
 ]);
 const button = (label: string, action: string, extra = "") =>
   `<button type="button" data-action="${action}" ${extra} ${OBR.isAvailable && !connected && mutationButtons.has(action) ? "disabled" : ""}>${label}</button>`;
@@ -763,7 +764,7 @@ function fleet() {
   return `<div class="fleet-select"><label for="ship-select">${role === "GM" ? "Ship library" : "Your fleet"}</label><select id="ship-select">${visible.map((s) => `<option value="${s.id}" ${shipId === s.id ? "selected" : ""}>${escapeHtml(s.name)} · ${s.kind}</option>`).join("")}</select></div>${shipDetail()}`;
 }
 function crewScreen() {
-  return `${heading(role === "GM" ? "Crew roster" : "Your crew")}<p class="context">${role === "GM" ? "NPC crew stay with their ship." : "Mara Voss · player fleet crew"}</p>${crewCards(role === "GM" ? crew : playerCrew())}`;
+  return `${heading(role === "GM" ? "Crew roster" : "Your crew")}<p class="context">${role === "GM" ? "NPC crew stay with their ship." : "Player fleet crew"}</p>${crewCards(role === "GM" ? crew : playerCrew())}`;
 }
 function encounters() {
   return `${heading("Saved encounters", button("+ New", "new-encounter"))}${savedEncounters.map((e) => `<article class="saved-encounter"><h2>${escapeHtml(e.name)}</h2><p class="context">${e.shipIds.length} ships · Round ${e.round} · ${e.running ? "In progress" : "Paused"}</p><div class="toolbar">${button("Edit", "edit-encounter", `data-value="${e.id}"`)}${button("Open →", "open-encounter", `data-value="${e.id}" class="primary"`)}</div></article>`).join("") || '<p class="empty">Create or import your first encounter.</p>'}`;
@@ -773,7 +774,7 @@ function encounterEditor() {
   return `${heading(freshEncounter ? "New encounter" : "Edit encounter")}<form data-form="encounter" class="encounter-form"><label for="encounter-name">Name</label><input id="encounter-name" name="name" required value="${freshEncounter ? "" : escapeHtml(selected?.name ?? encounterName)}" placeholder="Encounter name"/><h3>Include ships</h3>${ships.map((s) => `<label class="check-row"><input type="checkbox" name="ship" value="${s.id}" ${!freshEncounter && (selected?.shipIds ?? encounterIds).includes(s.id) ? "checked" : ""}/><span><strong>${escapeHtml(s.name)}</strong><small>${s.kind} · ${escapeHtml(s.class)}</small></span></label>`).join("")}<div class="form-actions">${button("Cancel", "nav", 'data-value="Encounters"')}<button class="primary">${freshEncounter ? "Create" : "Save"} encounter</button></div></form>`;
 }
 function importScreen() {
-  return `${heading("Library JSON", button("Export", "export"))}<p class="context">Player ships and crew go to this scene; NPCs and encounters stay in this GM browser. Export a backup before replacing a library.</p><label for="import-mode">Import mode</label><select id="import-mode"><option value="replace" ${importMode === "replace" ? "selected" : ""}>Replace library</option><option value="merge" ${importMode === "merge" ? "selected" : ""}>Merge entries</option></select><label for="import-file">Open JSON file</label><input id="import-file" type="file" accept="application/json,.json"/><label for="json">Or paste JSON</label><textarea id="json" rows="9" spellcheck="false">${escapeHtml(importText)}</textarea><div class="toolbar">${button("Preview import", "preview-json", 'class="primary"')}${button("Example JSON", "sample-json")}</div><div id="import-result" role="status">${importError ? `<p class="error">${escapeHtml(importError)}</p>` : importPreview ? `<p>${importPreview.ships?.length ?? 0} ships · ${importPreview.crew?.length ?? 0} crew · ${importPreview.encounters?.length ?? 0} encounters</p><p class="context">${importMode === "replace" ? `Replaces the entire current library, including starter data. Removes ${ships.filter((s) => !importPreview!.ships?.some((entry) => entry.id === s.id)).length} ships, ${crew.filter((c) => !importPreview!.crew?.some((entry) => entry.id === c.id)).length} crew and ${savedEncounters.filter((e) => !importPreview!.encounters?.some((entry) => entry.id === e.id)).length} encounters absent from this JSON. Omitted collections become empty.` : "Merges entries by ID; matching entries are replaced and other entries are kept."} All references and assignments are validated before saving.</p>${button("Import library", "import-library", 'class="primary"')}` : ""}</div>`;
+  return `${heading("Library JSON", button("Export", "export"))}<p class="context">Player ships and crew go to this scene; NPCs and encounters stay in this GM browser. Export a backup before replacing a library.</p><p class="context">Built-in Naranja preset: 4 ships, 13 crew and 1 paused encounter. Replaces the entire library, including current progress.</p>${button("Replace with Naranja preset", "load-defaults")}<label for="import-mode">Import mode</label><select id="import-mode"><option value="replace" ${importMode === "replace" ? "selected" : ""}>Replace library</option><option value="merge" ${importMode === "merge" ? "selected" : ""}>Merge entries</option></select><label for="import-file">Open JSON file</label><input id="import-file" type="file" accept="application/json,.json"/><label for="json">Or paste JSON</label><textarea id="json" rows="9" spellcheck="false">${escapeHtml(importText)}</textarea><div class="toolbar">${button("Preview import", "preview-json", 'class="primary"')}${button("Example JSON", "sample-json")}</div><div id="import-result" role="status">${importError ? `<p class="error">${escapeHtml(importError)}</p>` : importPreview ? `<p>${importPreview.ships?.length ?? 0} ships · ${importPreview.crew?.length ?? 0} crew · ${importPreview.encounters?.length ?? 0} encounters</p><p class="context">${importMode === "replace" ? `Replaces the entire current library, including starter data. Removes ${ships.filter((s) => !importPreview!.ships?.some((entry) => entry.id === s.id)).length} ships, ${crew.filter((c) => !importPreview!.crew?.some((entry) => entry.id === c.id)).length} crew and ${savedEncounters.filter((e) => !importPreview!.encounters?.some((entry) => entry.id === e.id)).length} encounters absent from this JSON. Omitted collections become empty.` : "Merges entries by ID; matching entries are replaced and other entries are kept."} All references and assignments are validated before saving.</p>${button("Import library", "import-library", 'class="primary"')}` : ""}</div>`;
 }
 app.addEventListener(
   "toggle",
@@ -1444,6 +1445,13 @@ app.addEventListener("click", async (e) => {
       );
       importPreview = null;
       importError = "";
+      break;
+    case "load-defaults":
+      if (await commit({ op: "load-defaults" })) {
+        importPreview = null;
+        importError = "";
+        message = "Naranja preset loaded.";
+      }
       break;
     case "import-library":
       if (

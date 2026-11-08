@@ -1,0 +1,3081 @@
+{
+  "version": 1,
+  "ships": [
+    {
+      "id": "naranja-mecanica",
+      "name": "Naranja Mecanica",
+      "kind": "Player",
+      "class": "Frigate GD Bismuth",
+      "stats": {
+        "ac": 16,
+        "maxG": 10,
+        "speed": 1
+      },
+      "gs": 0,
+      "ammunition": [
+        {
+          "name": "Autonomy",
+          "current": 80,
+          "capacity": 80
+        },
+        {
+          "name": "Fission Torpedos",
+          "current": 10,
+          "capacity": 10
+        },
+        {
+          "name": "Repair Drones",
+          "current": 5,
+          "capacity": 5
+        },
+        {
+          "name": "DMG Drones",
+          "current": 5,
+          "capacity": 5
+        },
+        {
+          "name": "ATP Jumps",
+          "current": 2,
+          "capacity": 2
+        }
+      ],
+      "parts": [
+        {
+          "name": "Systems",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "depressurization",
+                "name": "Depressurization",
+                "type": "Damage",
+                "description": "GM adjudicates environmental consequences; no numeric penalty supplied."
+              },
+              {
+                "id": "technician-off",
+                "name": "Technician disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["technician"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "navigation-off",
+                "name": "Navigation disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["navigator"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "comms-off",
+                "name": "Comms disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["comms"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "depressurization",
+                "name": "Depressurization",
+                "type": "Damage",
+                "description": "GM adjudicates environmental consequences; no numeric penalty supplied."
+              },
+              {
+                "id": "technician-off",
+                "name": "Technician disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["technician"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "navigation-off",
+                "name": "Navigation disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["navigator"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "comms-off",
+                "name": "Comms disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["comms"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "all-systems-off",
+                "name": "All systems disabled",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": [
+                  "captain",
+                  "pilot",
+                  "navigator",
+                  "artillery",
+                  "drone-control",
+                  "comms",
+                  "technician"
+                ]
+              }
+            ],
+            [
+              {
+                "id": "all-systems-destroyed",
+                "name": "All systems destroyed",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": [
+                  "captain",
+                  "pilot",
+                  "navigator",
+                  "artillery",
+                  "drone-control",
+                  "comms",
+                  "technician"
+                ]
+              }
+            ]
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Navigation",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "no-atp",
+                "name": "Cannot ATP Jump",
+                "type": "Damage",
+                "description": "GM prohibits ATP Jump; the importer cannot express a negative effect requirement."
+              },
+              {
+                "id": "maxg-minus5",
+                "name": "MaxG -5",
+                "type": "Damage",
+                "description": "",
+                "stats": {
+                  "maxG": -5
+                }
+              },
+              {
+                "id": "nav-save-disadvantage",
+                "name": "Disadvantage on PILOT / DEX / STR saves",
+                "type": "Damage",
+                "description": "",
+                "rolls": [
+                  {
+                    "stationId": "pilot",
+                    "rollType": "PILOT",
+                    "disadvantage": 1
+                  },
+                  {
+                    "stationId": "pilot",
+                    "rollType": "DEX",
+                    "disadvantage": 1
+                  },
+                  {
+                    "stationId": "pilot",
+                    "rollType": "STR",
+                    "disadvantage": 1
+                  }
+                ]
+              },
+              {
+                "id": "lost-control",
+                "name": "Lost control (2 turns)",
+                "type": "Damage",
+                "description": "GM adjudicates loss of control for two triggering crew turns.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "no-atp",
+                "name": "Cannot ATP Jump",
+                "type": "Damage",
+                "description": "GM prohibits ATP Jump; the importer cannot express a negative effect requirement."
+              },
+              {
+                "id": "maxg-minus5",
+                "name": "MaxG -5",
+                "type": "Damage",
+                "description": "",
+                "stats": {
+                  "maxG": -5
+                }
+              },
+              {
+                "id": "nav-save-disadvantage",
+                "name": "Disadvantage on PILOT / DEX / STR saves",
+                "type": "Damage",
+                "description": "",
+                "rolls": [
+                  {
+                    "stationId": "pilot",
+                    "rollType": "PILOT",
+                    "disadvantage": 1
+                  },
+                  {
+                    "stationId": "pilot",
+                    "rollType": "DEX",
+                    "disadvantage": 1
+                  },
+                  {
+                    "stationId": "pilot",
+                    "rollType": "STR",
+                    "disadvantage": 1
+                  }
+                ]
+              },
+              {
+                "id": "lost-control",
+                "name": "Lost control (2 turns)",
+                "type": "Damage",
+                "description": "GM adjudicates loss of control for two triggering crew turns.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "pilot-off",
+                "name": "Pilot disabled",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["pilot"]
+              }
+            ],
+            [
+              {
+                "id": "pilot-destroyed",
+                "name": "Pilot destroyed",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["pilot"]
+              }
+            ]
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Weapons",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "pdc-disadvantage",
+                "name": "PDC disadvantage",
+                "type": "Damage",
+                "description": "",
+                "rolls": [
+                  {
+                    "rollType": "pdc Attack",
+                    "disadvantage": 1
+                  }
+                ]
+              },
+              {
+                "id": "railguns-off",
+                "name": "All Railguns disabled (2 turns)",
+                "type": "Damage",
+                "description": "GM prohibits Ballistic Railgun for two triggering crew turns; PDC and torpedoes remain usable.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "torpedoes-off",
+                "name": "All Torpedos disabled (2 turns)",
+                "type": "Damage",
+                "description": "GM prohibits torpedo launches for two triggering crew turns.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "drones-off",
+                "name": "All Drones disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["drone-control"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "pdc-disadvantage",
+                "name": "PDC disadvantage",
+                "type": "Damage",
+                "description": "",
+                "rolls": [
+                  {
+                    "rollType": "pdc Attack",
+                    "disadvantage": 1
+                  }
+                ]
+              },
+              {
+                "id": "railguns-off",
+                "name": "All Railguns disabled (2 turns)",
+                "type": "Damage",
+                "description": "GM prohibits Ballistic Railgun for two triggering crew turns; PDC and torpedoes remain usable.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "torpedoes-off",
+                "name": "All Torpedos disabled (2 turns)",
+                "type": "Damage",
+                "description": "GM prohibits torpedo launches for two triggering crew turns.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "drones-off",
+                "name": "All Drones disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["drone-control"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "artillery-drones-off",
+                "name": "All Artillery and Drone control disabled",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["artillery", "drone-control"]
+              }
+            ],
+            [
+              {
+                "id": "weapons-destroyed",
+                "name": "Weapons destroyed",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["artillery", "drone-control"]
+              }
+            ]
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Hull",
+          "damage": 0,
+          "levels": [
+            [],
+            [],
+            [
+              {
+                "id": "incoming-cat-1",
+                "name": "Incoming damage +1 CAT",
+                "type": "Damage",
+                "description": "Manual target-side adjustment to the attacker's damage. Use the highest Hull penalty only."
+              }
+            ],
+            [
+              {
+                "id": "incoming-cat-2",
+                "name": "Incoming damage +2 CAT",
+                "type": "Damage",
+                "description": "Manual target-side adjustment to the attacker's damage. Replaces the +1 tier; do not add them."
+              }
+            ]
+          ],
+          "applied": {}
+        }
+      ],
+      "stations": [
+        {
+          "id": "captain",
+          "name": "Captain",
+          "type": "Captain",
+          "seats": ["lavos"],
+          "actions": [
+            {
+              "id": "save-cha",
+              "name": "CHA save",
+              "kind": "roll",
+              "type": "CHA",
+              "rolls": [
+                {
+                  "label": "CHA save",
+                  "type": "CHA",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "give-orders",
+              "name": "Give orders",
+              "kind": "utility",
+              "description": "Choose another crew member to act immediately on your turn. Resolve that action through their crew view. Do not advance initiative or expire effects as though their normal turn started."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "pilot",
+          "name": "Pilot",
+          "type": "Pilot",
+          "seats": ["big-johnny"],
+          "actions": [
+            {
+              "id": "save-pilot",
+              "name": "PILOT save",
+              "kind": "roll",
+              "type": "PILOT",
+              "rolls": [
+                {
+                  "label": "PILOT save",
+                  "type": "PILOT",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-str",
+              "name": "STR save",
+              "kind": "roll",
+              "type": "STR",
+              "rolls": [
+                {
+                  "label": "STR save",
+                  "type": "STR",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-dex",
+              "name": "DEX save",
+              "kind": "roll",
+              "type": "DEX",
+              "rolls": [
+                {
+                  "label": "DEX save",
+                  "type": "DEX",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "pilot-dash",
+              "name": "Pilot / Dash",
+              "kind": "utility",
+              "description": "Move the ship up to its effective Speed in km. Use the separate +1G or -1G buttons as appropriate; the extension does not move map tokens.",
+              "gs": {
+                "amount": 1,
+                "on": "button"
+              }
+            },
+            {
+              "id": "reduce-g",
+              "name": "Adjust thrust (-1G)",
+              "kind": "utility",
+              "description": "Companion to Pilot / Dash: reduce current Gs by 1.",
+              "gs": {
+                "amount": -1,
+                "on": "button"
+              }
+            },
+            {
+              "id": "thrust-control",
+              "name": "Thrust control (-5G)",
+              "kind": "utility",
+              "description": "Reduce current Gs by 5.",
+              "gs": {
+                "amount": -5
+              }
+            },
+            {
+              "id": "dodge",
+              "name": "Dodge (+5G)",
+              "kind": "utility",
+              "description": "Add 5G and gain advantage on DEX saves until the start of this crew member's next turn. While Optimize Routing is active, manually correct the cost to +2G.",
+              "gs": {
+                "amount": 5
+              },
+              "grantsEffects": [
+                {
+                  "id": "dodging",
+                  "name": "Dodging",
+                  "type": "Maneuver",
+                  "description": "",
+                  "duration": {
+                    "unit": "crewTurns",
+                    "count": 1
+                  },
+                  "rolls": [
+                    {
+                      "rollType": "DEX",
+                      "advantage": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "atp-jump",
+              "name": "ATP Jump",
+              "kind": "utility",
+              "description": "Spend 1 ATP Jump; requires ATP Jump route. GM must remove the route effect after use and adjudicate movement. Cannot jump while a navigation damage effect forbids it.",
+              "ammunition": {
+                "name": "ATP Jumps",
+                "cost": 1
+              },
+              "requiresEffects": ["atp-route"]
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "navigator",
+          "name": "Navigator",
+          "type": "Navigator",
+          "seats": ["ace"],
+          "actions": [
+            {
+              "id": "plan-atp",
+              "name": "Plan ATP Jump",
+              "kind": "utility",
+              "description": "Add ATP Jump route. The route persists until used; GM removes it after a jump. Repeated planning should not stack routes.",
+              "grantsEffects": [
+                {
+                  "id": "atp-route",
+                  "name": "ATP Jump route",
+                  "type": "Navigation",
+                  "description": ""
+                }
+              ]
+            },
+            {
+              "id": "evasive-route",
+              "name": "Plan an Evasive route",
+              "kind": "utility",
+              "description": "Advantage on DEX saves until the start of this crew member's next turn.",
+              "grantsEffects": [
+                {
+                  "id": "evasive-route",
+                  "name": "Evasive route",
+                  "type": "Navigation",
+                  "description": "",
+                  "duration": {
+                    "unit": "crewTurns",
+                    "count": 1
+                  },
+                  "rolls": [
+                    {
+                      "rollType": "DEX",
+                      "advantage": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "optimize-routing",
+              "name": "Optimize Routing",
+              "kind": "utility",
+              "description": "Until the start of this crew member's next turn, halve G costs for actions that add Gs, rounded down. Manual: Dodge costs +2G; a +1G increment costs 0G. Adjust using the G buttons.",
+              "grantsEffects": [
+                {
+                  "id": "optimized-routing",
+                  "name": "Optimize Routing",
+                  "type": "Navigation",
+                  "description": "",
+                  "duration": {
+                    "unit": "crewTurns",
+                    "count": 1
+                  }
+                }
+              ]
+            },
+            {
+              "id": "scan-area",
+              "name": "Scan area",
+              "kind": "roll",
+              "type": "Search",
+              "rolls": [
+                {
+                  "label": "Scan area",
+                  "type": "Search",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "description": "Search roll: obtain additional surrounding-area data or find special areas. GM supplies results."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "artillery",
+          "name": "Artillery",
+          "type": "Artillery",
+          "seats": ["ordhel", null],
+          "actions": [
+            {
+              "id": "pdc",
+              "name": "PDC",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "pdc Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d12",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "Attack 1d20 + Attack modifier; damage 1d12. No ammunition or cooldown. GM handles normal/long range.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "1 / 2 km"
+                }
+              ]
+            },
+            {
+              "id": "covering-fire",
+              "name": "Covering Fire",
+              "kind": "utility",
+              "description": "Any range. Prevents torpedo launches and deals damage on approach within 2 km. GM adjudicates the covered lane, duration, launch restrictions and damage; no damage formula was supplied.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "Any"
+                },
+                {
+                  "name": "Approach",
+                  "value": "2 km"
+                }
+              ]
+            },
+            {
+              "id": "railgun",
+              "name": "Ballistic Railgun",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "railgun Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d8",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "One railgun cooldown slot of 1. Attack 1d20 + Attack; damage 1d8.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "4 / 20 km"
+                }
+              ],
+              "cooldown": 1
+            },
+            {
+              "id": "fission-torpedo",
+              "name": "Launch Fission Torpedo",
+              "kind": "roll",
+              "type": "Attack",
+              "activation": "use",
+              "cooldown": [2, 2],
+              "cooldownName": "torpedo-bays",
+              "ammunition": {
+                "name": "Fission Torpedos",
+                "cost": 1
+              },
+              "values": [
+                {
+                  "name": "Torpedo speed",
+                  "value": "4 km"
+                },
+                {
+                  "name": "Area",
+                  "value": "1 km"
+                },
+                {
+                  "name": "Cooldown slots",
+                  "value": "Torpedo Bay 1 / Torpedo Bay 2"
+                }
+              ],
+              "rolls": [
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "3d8",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "Use launches one torpedo, spends one round of ammunition and starts one available bay's cooldown of 2. Resolve 3d8 damage on impact. No attack roll was specified; GM handles travel, area and impact."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "drone-control",
+          "name": "Drone Control",
+          "type": "Drone Control",
+          "seats": ["iji", null],
+          "actions": [
+            {
+              "id": "repair-drone",
+              "name": "Repair Drone",
+              "kind": "remove-effect",
+              "effectType": "Damage",
+              "activationRoll": {
+                "label": "Repair",
+                "type": "Repair",
+                "notation": "1d20"
+              },
+              "ammunition": {
+                "name": "Repair Drones",
+                "cost": 1
+              },
+              "cooldown": [2, 2],
+              "cooldownName": "drone-bays",
+              "values": [
+                {
+                  "name": "Cooldown slots",
+                  "value": "Drone Bay 1 / Drone Bay 2"
+                }
+              ],
+              "description": "Launch and roll 1d20 + Repair, then choose a Damage effect to remove on this ship after GM adjudicates success. Damage counters remain unchanged. For a drone sent to another ship, cancel the local selector and have the GM remove the target effect; launch costs remain spent."
+            },
+            {
+              "id": "damage-drone",
+              "name": "DMG Drone",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "damage-drone Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d6",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "activation": "use",
+              "cooldownName": "drone-bays",
+              "ammunition": {
+                "name": "DMG Drones",
+                "cost": 1
+              },
+              "description": "Use launches a drone at speed 1 km and spends one shared Drone Bay cooldown. Resolve Attack and Damage separately on arrival.",
+              "cooldown": [2, 2],
+              "values": [
+                {
+                  "name": "Drone speed",
+                  "value": "1 km"
+                },
+                {
+                  "name": "Cooldown slots",
+                  "value": "Drone Bay 1 / Drone Bay 2"
+                }
+              ]
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "comms",
+          "name": "Comms",
+          "type": "Comms",
+          "seats": [null],
+          "actions": [
+            {
+              "id": "save-int",
+              "name": "INT save",
+              "kind": "roll",
+              "type": "INT",
+              "rolls": [
+                {
+                  "label": "INT save",
+                  "type": "INT",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-wis",
+              "name": "WIS save",
+              "kind": "roll",
+              "type": "WIS",
+              "rolls": [
+                {
+                  "label": "WIS save",
+                  "type": "WIS",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "ship-scan",
+              "name": "Ship Scan",
+              "kind": "roll",
+              "type": "Search",
+              "rolls": [
+                {
+                  "label": "Ship Scan",
+                  "type": "Search",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "description": "Search roll: detect and identify nearby ships. GM supplies results."
+            },
+            {
+              "id": "counterhack",
+              "name": "Counterhack",
+              "kind": "remove-effect",
+              "effectType": "Hack",
+              "activationRoll": {
+                "label": "Hack",
+                "type": "Hack",
+                "notation": "1d20"
+              },
+              "description": "Roll Hack, then select a Hack effect to remove. GM adjudicates success before confirmation; cancel if unsuccessful."
+            },
+            {
+              "id": "hack",
+              "name": "Hack",
+              "kind": "utility",
+              "description": "Roll Hack, choose a target ship, then confirm Target Locked if successful. GM adjudicates the roll and what Target Locked does; no numerical effect or duration was supplied.",
+              "activationRoll": {
+                "label": "Hack",
+                "type": "Hack",
+                "notation": "1d20"
+              },
+              "shipSelector": true,
+              "grantsEffects": [
+                {
+                  "id": "target-locked",
+                  "name": "Target Locked",
+                  "type": "Hack",
+                  "description": "Target Locked hack effect. GM adjudicates its benefits; remove with Counterhack or GM dismissal."
+                }
+              ]
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "technician",
+          "name": "Technician",
+          "type": "Technician",
+          "seats": ["nemo"],
+          "actions": [
+            {
+              "id": "save-con",
+              "name": "CON save",
+              "kind": "roll",
+              "type": "CON",
+              "rolls": [
+                {
+                  "label": "CON save",
+                  "type": "CON",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "force-repair",
+              "name": "Force Repair",
+              "kind": "utility",
+              "description": "Spend 1 Autonomy. GM temporarily suppresses one Damage effect until the start of this crew member's next turn, then restores it if its original source still applies. Do not permanently remove it or reduce damage. Temporary suppression/restoration is manual.",
+              "ammunition": {
+                "name": "Autonomy",
+                "cost": 1
+              }
+            },
+            {
+              "id": "reroute-energy",
+              "name": "Reroute energy",
+              "kind": "effects",
+              "description": "Choose exactly ONE positive and ONE negative allocation from different systems. The selector does not enforce this. Keep selected until rerouted; no expiry supplied. Weapon cooldown changes apply to future starts, not cooldowns already running. Arcane is currently disabled and has no usable action.",
+              "effects": [
+                {
+                  "id": "weapons-boost",
+                  "name": "Weapons: -1 Cooldown",
+                  "type": "Power",
+                  "description": "",
+                  "cooldowns": [
+                    {
+                      "actionType": "Attack",
+                      "modifier": -1
+                    }
+                  ]
+                },
+                {
+                  "id": "weapons-penalty",
+                  "name": "Weapons: +1 Cooldown",
+                  "type": "Power",
+                  "description": "",
+                  "cooldowns": [
+                    {
+                      "actionType": "Attack",
+                      "modifier": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "engine-boost",
+                  "name": "Engine: +0.5 km Speed",
+                  "type": "Power",
+                  "description": "",
+                  "stats": {
+                    "speed": 0.5
+                  }
+                },
+                {
+                  "id": "engine-penalty",
+                  "name": "Engine: -0.5 km Speed",
+                  "type": "Power",
+                  "description": "",
+                  "stats": {
+                    "speed": -0.5
+                  }
+                },
+                {
+                  "id": "comms-boost",
+                  "name": "Comms: Advantage",
+                  "type": "Power",
+                  "description": "",
+                  "rolls": [
+                    {
+                      "stationId": "comms",
+                      "advantage": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "open-comms",
+                  "name": "Open Comms",
+                  "type": "Power",
+                  "description": "Negative Comms allocation. GM adjudicates consequences; no numerical penalty supplied."
+                },
+                {
+                  "id": "shields-up",
+                  "name": "Shields Up",
+                  "type": "Power",
+                  "description": "Positive shield allocation. GM adjudicates benefits; no numerical value supplied."
+                },
+                {
+                  "id": "shields-down",
+                  "name": "Shields Down",
+                  "type": "Power",
+                  "description": "Negative shield allocation. GM adjudicates consequences; no numerical value supplied."
+                }
+              ]
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        }
+      ]
+    },
+    {
+      "id": "rustbite",
+      "name": "Rustbite",
+      "kind": "NPC",
+      "class": "GD Fighter",
+      "stats": {
+        "ac": 16,
+        "maxG": 10,
+        "speed": 1
+      },
+      "gs": 0,
+      "ammunition": [
+        {
+          "name": "Autonomy",
+          "current": 80,
+          "capacity": 80
+        }
+      ],
+      "parts": [
+        {
+          "name": "Systems",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "fighter-systems-off",
+                "name": "All disabled except pilot and weapons (2 turns)",
+                "type": "Damage",
+                "description": "For two triggering crew turns, only piloting and weapons function. GM restricts other actions (including Counterhack); mixed pilot/weapon stations cannot be selectively blocked.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "nonpilot-disabled",
+                "name": "Crew outside Pilot disabled",
+                "type": "Damage",
+                "description": "GM disables the crew member outside the Pilot seat and reverses this when repaired. This follows crew, not just the Co-pilot station."
+              }
+            ],
+            [
+              {
+                "id": "ship-destroyed",
+                "name": "Ship destroyed",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["pilot", "co-pilot"]
+              }
+            ]
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Navigation",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "fighter-nav-limits",
+                "name": "Maximum 1 km / 15G",
+                "type": "Damage",
+                "description": "Limits are recorded literally as supplied: Speed 1 km, maxG 15. Base Speed is already 1 km; maxG increases from the supplied base 10 to 15.",
+                "stats": {
+                  "maxG": 5
+                }
+              }
+            ],
+            [
+              {
+                "id": "copilot-disabled",
+                "name": "Co-Pilot disabled",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["co-pilot"]
+              }
+            ],
+            [
+              {
+                "id": "navigation-destroyed",
+                "name": "Navigation destroyed",
+                "type": "Damage",
+                "description": "GM prevents navigation/piloting as appropriate; weapons remain independently usable."
+              }
+            ],
+            []
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Weapons",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "weapon-disadvantage",
+                "name": "All weapon attacks at disadvantage",
+                "type": "Damage",
+                "description": "",
+                "rolls": [
+                  {
+                    "rollType": "pdc Attack",
+                    "disadvantage": 1
+                  },
+                  {
+                    "rollType": "railgun Attack",
+                    "disadvantage": 1
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "id": "all-weapons-off",
+                "name": "All weapons disabled",
+                "type": "Damage",
+                "description": "GM prohibits PDC, Covering Fire and Ballistic Railgun. Mixed Pilot/Co-pilot stations remain available for piloting and Counterhack."
+              }
+            ],
+            [
+              {
+                "id": "weapons-destroyed",
+                "name": "Weapons destroyed",
+                "type": "Damage",
+                "description": "GM prohibits all weapon use until repaired."
+              }
+            ],
+            []
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Hull",
+          "damage": 0,
+          "levels": [
+            [],
+            [
+              {
+                "id": "incoming-cat-1",
+                "name": "Incoming damage +1 CAT",
+                "type": "Damage",
+                "description": "Manual target-side adjustment to the attacker's damage. Use the highest Hull penalty only."
+              }
+            ],
+            [
+              {
+                "id": "incoming-cat-2",
+                "name": "Incoming damage +2 CAT",
+                "type": "Damage",
+                "description": "Manual target-side adjustment to the attacker's damage. Replaces the +1 tier; do not add them."
+              }
+            ],
+            []
+          ],
+          "applied": {}
+        }
+      ],
+      "stations": [
+        {
+          "id": "pilot",
+          "name": "Pilot",
+          "type": "Pilot",
+          "seats": ["vera-kest"],
+          "actions": [
+            {
+              "id": "save-pilot",
+              "name": "PILOT save",
+              "kind": "roll",
+              "type": "PILOT",
+              "rolls": [
+                {
+                  "label": "PILOT save",
+                  "type": "PILOT",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-str",
+              "name": "STR save",
+              "kind": "roll",
+              "type": "STR",
+              "rolls": [
+                {
+                  "label": "STR save",
+                  "type": "STR",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-dex",
+              "name": "DEX save",
+              "kind": "roll",
+              "type": "DEX",
+              "rolls": [
+                {
+                  "label": "DEX save",
+                  "type": "DEX",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-cha",
+              "name": "CHA save",
+              "kind": "roll",
+              "type": "CHA",
+              "rolls": [
+                {
+                  "label": "CHA save",
+                  "type": "CHA",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-int",
+              "name": "INT save",
+              "kind": "roll",
+              "type": "INT",
+              "rolls": [
+                {
+                  "label": "INT save",
+                  "type": "INT",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-wis",
+              "name": "WIS save",
+              "kind": "roll",
+              "type": "WIS",
+              "rolls": [
+                {
+                  "label": "WIS save",
+                  "type": "WIS",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-con",
+              "name": "CON save",
+              "kind": "roll",
+              "type": "CON",
+              "rolls": [
+                {
+                  "label": "CON save",
+                  "type": "CON",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "pilot-dash",
+              "name": "Pilot / Dash",
+              "kind": "utility",
+              "description": "Move the ship up to its effective Speed in km. Use the separate +1G or -1G buttons as appropriate; the extension does not move map tokens.",
+              "gs": {
+                "amount": 1,
+                "on": "button"
+              }
+            },
+            {
+              "id": "reduce-g",
+              "name": "Adjust thrust (-1G)",
+              "kind": "utility",
+              "description": "Companion to Pilot / Dash: reduce current Gs by 1.",
+              "gs": {
+                "amount": -1,
+                "on": "button"
+              }
+            },
+            {
+              "id": "thrust-control",
+              "name": "Thrust control (-5G)",
+              "kind": "utility",
+              "description": "Reduce current Gs by 5.",
+              "gs": {
+                "amount": -5
+              }
+            },
+            {
+              "id": "dodge",
+              "name": "Dodge (+5G)",
+              "kind": "utility",
+              "description": "Add 5G and gain advantage on DEX saves until the start of this crew member's next turn. While Optimize Routing is active, manually correct the cost to +2G.",
+              "gs": {
+                "amount": 5
+              },
+              "grantsEffects": [
+                {
+                  "id": "dodging",
+                  "name": "Dodging",
+                  "type": "Maneuver",
+                  "description": "",
+                  "duration": {
+                    "unit": "crewTurns",
+                    "count": 1
+                  },
+                  "rolls": [
+                    {
+                      "rollType": "DEX",
+                      "advantage": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "pdc",
+              "name": "PDC",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "pdc Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d12",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "Attack 1d20 + Attack modifier; damage 1d12. No ammunition or cooldown. GM handles normal/long range.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "1 / 2 km"
+                }
+              ]
+            },
+            {
+              "id": "counterhack",
+              "name": "Counterhack",
+              "kind": "remove-effect",
+              "effectType": "Hack",
+              "activationRoll": {
+                "label": "Hack",
+                "type": "Hack",
+                "notation": "1d20"
+              },
+              "description": "Roll Hack, then select a Hack effect to remove. GM adjudicates success before confirmation; cancel if unsuccessful."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "co-pilot",
+          "name": "Co-pilot",
+          "type": "Co-pilot",
+          "seats": ["dax-rusk"],
+          "actions": [
+            {
+              "id": "pdc",
+              "name": "PDC",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "pdc Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d12",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "Attack 1d20 + Attack modifier; damage 1d12. No ammunition or cooldown. GM handles normal/long range.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "1 / 2 km"
+                }
+              ]
+            },
+            {
+              "id": "covering-fire",
+              "name": "Covering Fire",
+              "kind": "utility",
+              "description": "Any range. Prevents torpedo launches and deals damage on approach within 2 km. GM adjudicates the covered lane, duration, launch restrictions and damage; no damage formula was supplied.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "Any"
+                },
+                {
+                  "name": "Approach",
+                  "value": "2 km"
+                }
+              ]
+            },
+            {
+              "id": "railgun",
+              "name": "Ballistic Railgun",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "railgun Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d8",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "One railgun cooldown slot of 1. Attack 1d20 + Attack; damage 1d8.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "4 / 20 km"
+                }
+              ],
+              "cooldown": 1
+            },
+            {
+              "id": "counterhack",
+              "name": "Counterhack",
+              "kind": "remove-effect",
+              "effectType": "Hack",
+              "activationRoll": {
+                "label": "Hack",
+                "type": "Hack",
+                "notation": "1d20"
+              },
+              "description": "Roll Hack, then select a Hack effect to remove. GM adjudicates success before confirmation; cancel if unsuccessful."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        }
+      ]
+    },
+    {
+      "id": "false-courtesy",
+      "name": "False Courtesy",
+      "kind": "NPC",
+      "class": "GD Fighter",
+      "stats": {
+        "ac": 16,
+        "maxG": 10,
+        "speed": 1
+      },
+      "gs": 0,
+      "ammunition": [
+        {
+          "name": "Autonomy",
+          "current": 80,
+          "capacity": 80
+        }
+      ],
+      "parts": [
+        {
+          "name": "Systems",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "fighter-systems-off",
+                "name": "All disabled except pilot and weapons (2 turns)",
+                "type": "Damage",
+                "description": "For two triggering crew turns, only piloting and weapons function. GM restricts other actions (including Counterhack); mixed pilot/weapon stations cannot be selectively blocked.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "nonpilot-disabled",
+                "name": "Crew outside Pilot disabled",
+                "type": "Damage",
+                "description": "GM disables the crew member outside the Pilot seat and reverses this when repaired. This follows crew, not just the Co-pilot station."
+              }
+            ],
+            [
+              {
+                "id": "ship-destroyed",
+                "name": "Ship destroyed",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["pilot", "co-pilot"]
+              }
+            ]
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Navigation",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "fighter-nav-limits",
+                "name": "Maximum 1 km / 15G",
+                "type": "Damage",
+                "description": "Limits are recorded literally as supplied: Speed 1 km, maxG 15. Base Speed is already 1 km; maxG increases from the supplied base 10 to 15.",
+                "stats": {
+                  "maxG": 5
+                }
+              }
+            ],
+            [
+              {
+                "id": "copilot-disabled",
+                "name": "Co-Pilot disabled",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["co-pilot"]
+              }
+            ],
+            [
+              {
+                "id": "navigation-destroyed",
+                "name": "Navigation destroyed",
+                "type": "Damage",
+                "description": "GM prevents navigation/piloting as appropriate; weapons remain independently usable."
+              }
+            ],
+            []
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Weapons",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "weapon-disadvantage",
+                "name": "All weapon attacks at disadvantage",
+                "type": "Damage",
+                "description": "",
+                "rolls": [
+                  {
+                    "rollType": "pdc Attack",
+                    "disadvantage": 1
+                  },
+                  {
+                    "rollType": "railgun Attack",
+                    "disadvantage": 1
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "id": "all-weapons-off",
+                "name": "All weapons disabled",
+                "type": "Damage",
+                "description": "GM prohibits PDC, Covering Fire and Ballistic Railgun. Mixed Pilot/Co-pilot stations remain available for piloting and Counterhack."
+              }
+            ],
+            [
+              {
+                "id": "weapons-destroyed",
+                "name": "Weapons destroyed",
+                "type": "Damage",
+                "description": "GM prohibits all weapon use until repaired."
+              }
+            ],
+            []
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Hull",
+          "damage": 0,
+          "levels": [
+            [],
+            [
+              {
+                "id": "incoming-cat-1",
+                "name": "Incoming damage +1 CAT",
+                "type": "Damage",
+                "description": "Manual target-side adjustment to the attacker's damage. Use the highest Hull penalty only."
+              }
+            ],
+            [
+              {
+                "id": "incoming-cat-2",
+                "name": "Incoming damage +2 CAT",
+                "type": "Damage",
+                "description": "Manual target-side adjustment to the attacker's damage. Replaces the +1 tier; do not add them."
+              }
+            ],
+            []
+          ],
+          "applied": {}
+        }
+      ],
+      "stations": [
+        {
+          "id": "pilot",
+          "name": "Pilot",
+          "type": "Pilot",
+          "seats": ["sela-venn"],
+          "actions": [
+            {
+              "id": "save-pilot",
+              "name": "PILOT save",
+              "kind": "roll",
+              "type": "PILOT",
+              "rolls": [
+                {
+                  "label": "PILOT save",
+                  "type": "PILOT",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-str",
+              "name": "STR save",
+              "kind": "roll",
+              "type": "STR",
+              "rolls": [
+                {
+                  "label": "STR save",
+                  "type": "STR",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-dex",
+              "name": "DEX save",
+              "kind": "roll",
+              "type": "DEX",
+              "rolls": [
+                {
+                  "label": "DEX save",
+                  "type": "DEX",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-cha",
+              "name": "CHA save",
+              "kind": "roll",
+              "type": "CHA",
+              "rolls": [
+                {
+                  "label": "CHA save",
+                  "type": "CHA",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-int",
+              "name": "INT save",
+              "kind": "roll",
+              "type": "INT",
+              "rolls": [
+                {
+                  "label": "INT save",
+                  "type": "INT",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-wis",
+              "name": "WIS save",
+              "kind": "roll",
+              "type": "WIS",
+              "rolls": [
+                {
+                  "label": "WIS save",
+                  "type": "WIS",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-con",
+              "name": "CON save",
+              "kind": "roll",
+              "type": "CON",
+              "rolls": [
+                {
+                  "label": "CON save",
+                  "type": "CON",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "pilot-dash",
+              "name": "Pilot / Dash",
+              "kind": "utility",
+              "description": "Move the ship up to its effective Speed in km. Use the separate +1G or -1G buttons as appropriate; the extension does not move map tokens.",
+              "gs": {
+                "amount": 1,
+                "on": "button"
+              }
+            },
+            {
+              "id": "reduce-g",
+              "name": "Adjust thrust (-1G)",
+              "kind": "utility",
+              "description": "Companion to Pilot / Dash: reduce current Gs by 1.",
+              "gs": {
+                "amount": -1,
+                "on": "button"
+              }
+            },
+            {
+              "id": "thrust-control",
+              "name": "Thrust control (-5G)",
+              "kind": "utility",
+              "description": "Reduce current Gs by 5.",
+              "gs": {
+                "amount": -5
+              }
+            },
+            {
+              "id": "dodge",
+              "name": "Dodge (+5G)",
+              "kind": "utility",
+              "description": "Add 5G and gain advantage on DEX saves until the start of this crew member's next turn. While Optimize Routing is active, manually correct the cost to +2G.",
+              "gs": {
+                "amount": 5
+              },
+              "grantsEffects": [
+                {
+                  "id": "dodging",
+                  "name": "Dodging",
+                  "type": "Maneuver",
+                  "description": "",
+                  "duration": {
+                    "unit": "crewTurns",
+                    "count": 1
+                  },
+                  "rolls": [
+                    {
+                      "rollType": "DEX",
+                      "advantage": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "pdc",
+              "name": "PDC",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "pdc Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d12",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "Attack 1d20 + Attack modifier; damage 1d12. No ammunition or cooldown. GM handles normal/long range.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "1 / 2 km"
+                }
+              ]
+            },
+            {
+              "id": "counterhack",
+              "name": "Counterhack",
+              "kind": "remove-effect",
+              "effectType": "Hack",
+              "activationRoll": {
+                "label": "Hack",
+                "type": "Hack",
+                "notation": "1d20"
+              },
+              "description": "Roll Hack, then select a Hack effect to remove. GM adjudicates success before confirmation; cancel if unsuccessful."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "co-pilot",
+          "name": "Co-pilot",
+          "type": "Co-pilot",
+          "seats": ["orin-pike"],
+          "actions": [
+            {
+              "id": "pdc",
+              "name": "PDC",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "pdc Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d12",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "Attack 1d20 + Attack modifier; damage 1d12. No ammunition or cooldown. GM handles normal/long range.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "1 / 2 km"
+                }
+              ]
+            },
+            {
+              "id": "covering-fire",
+              "name": "Covering Fire",
+              "kind": "utility",
+              "description": "Any range. Prevents torpedo launches and deals damage on approach within 2 km. GM adjudicates the covered lane, duration, launch restrictions and damage; no damage formula was supplied.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "Any"
+                },
+                {
+                  "name": "Approach",
+                  "value": "2 km"
+                }
+              ]
+            },
+            {
+              "id": "railgun",
+              "name": "Ballistic Railgun",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "railgun Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d8",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "One railgun cooldown slot of 1. Attack 1d20 + Attack; damage 1d8.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "4 / 20 km"
+                }
+              ],
+              "cooldown": 1
+            },
+            {
+              "id": "counterhack",
+              "name": "Counterhack",
+              "kind": "remove-effect",
+              "effectType": "Hack",
+              "activationRoll": {
+                "label": "Hack",
+                "type": "Hack",
+                "notation": "1d20"
+              },
+              "description": "Roll Hack, then select a Hack effect to remove. GM adjudicates success before confirmation; cancel if unsuccessful."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        }
+      ]
+    },
+    {
+      "id": "second-mortgage",
+      "name": "Second Mortgage",
+      "kind": "NPC",
+      "class": "GD Frigate",
+      "stats": {
+        "ac": 15,
+        "maxG": 10,
+        "speed": 1
+      },
+      "gs": 0,
+      "ammunition": [
+        {
+          "name": "Autonomy",
+          "current": 80,
+          "capacity": 80
+        },
+        {
+          "name": "Fission Torpedos",
+          "current": 10,
+          "capacity": 10
+        },
+        {
+          "name": "ATP Jumps",
+          "current": 1,
+          "capacity": 1
+        }
+      ],
+      "parts": [
+        {
+          "name": "Systems",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "depressurization",
+                "name": "Depressurization",
+                "type": "Damage",
+                "description": "GM adjudicates environmental consequences; no numeric penalty supplied."
+              },
+              {
+                "id": "navigation-off",
+                "name": "Navigation disabled (2 turns)",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["navigator"],
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "all-systems-off",
+                "name": "All systems disabled",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": [
+                  "captain",
+                  "pilot",
+                  "navigator",
+                  "artillery"
+                ]
+              }
+            ],
+            [
+              {
+                "id": "all-systems-destroyed",
+                "name": "All systems destroyed",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": [
+                  "captain",
+                  "pilot",
+                  "navigator",
+                  "artillery"
+                ]
+              }
+            ]
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Navigation",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "no-atp",
+                "name": "Cannot ATP Jump",
+                "type": "Damage",
+                "description": "GM prohibits ATP Jump; the importer cannot express a negative effect requirement."
+              },
+              {
+                "id": "maxg-minus5",
+                "name": "MaxG -5",
+                "type": "Damage",
+                "description": "",
+                "stats": {
+                  "maxG": -5
+                }
+              },
+              {
+                "id": "nav-save-disadvantage",
+                "name": "Disadvantage on PILOT / DEX / STR saves",
+                "type": "Damage",
+                "description": "",
+                "rolls": [
+                  {
+                    "stationId": "pilot",
+                    "rollType": "PILOT",
+                    "disadvantage": 1
+                  },
+                  {
+                    "stationId": "pilot",
+                    "rollType": "DEX",
+                    "disadvantage": 1
+                  },
+                  {
+                    "stationId": "pilot",
+                    "rollType": "STR",
+                    "disadvantage": 1
+                  }
+                ]
+              },
+              {
+                "id": "lost-control",
+                "name": "Lost control (2 turns)",
+                "type": "Damage",
+                "description": "GM adjudicates loss of control for two triggering crew turns.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "pilot-off",
+                "name": "Pilot disabled",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["pilot"]
+              }
+            ],
+            [
+              {
+                "id": "pilot-destroyed",
+                "name": "Pilot destroyed",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["pilot"]
+              }
+            ]
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Weapons",
+          "damage": 0,
+          "levels": [
+            [
+              {
+                "id": "pdc-disadvantage",
+                "name": "PDC disadvantage",
+                "type": "Damage",
+                "description": "",
+                "rolls": [
+                  {
+                    "rollType": "pdc Attack",
+                    "disadvantage": 1
+                  }
+                ]
+              },
+              {
+                "id": "railguns-off",
+                "name": "All Railguns disabled (2 turns)",
+                "type": "Damage",
+                "description": "GM prohibits Ballistic Railgun for two triggering crew turns; PDC and torpedoes remain usable.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              },
+              {
+                "id": "torpedoes-off",
+                "name": "All Torpedos disabled (2 turns)",
+                "type": "Damage",
+                "description": "GM prohibits torpedo launches for two triggering crew turns.",
+                "duration": {
+                  "unit": "crewTurns",
+                  "count": 2
+                }
+              }
+            ],
+            [
+              {
+                "id": "artillery-drones-off",
+                "name": "All Artillery and Drone control disabled",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["artillery"]
+              }
+            ],
+            [
+              {
+                "id": "weapons-destroyed",
+                "name": "Weapons destroyed",
+                "type": "Damage",
+                "description": "Blocks normal rolls at the affected stations. GM also enforces disabled non-roll actions and any crew disabling.",
+                "disableStations": ["artillery"]
+              }
+            ]
+          ],
+          "applied": {}
+        },
+        {
+          "name": "Hull",
+          "damage": 0,
+          "levels": [
+            [],
+            [
+              {
+                "id": "incoming-cat-1",
+                "name": "Incoming damage +1 CAT",
+                "type": "Damage",
+                "description": "Manual target-side adjustment to the attacker's damage. Use the highest Hull penalty only."
+              }
+            ],
+            [
+              {
+                "id": "incoming-cat-2",
+                "name": "Incoming damage +2 CAT",
+                "type": "Damage",
+                "description": "Manual target-side adjustment to the attacker's damage. Replaces the +1 tier; do not add them."
+              }
+            ]
+          ],
+          "applied": {}
+        }
+      ],
+      "stations": [
+        {
+          "id": "captain",
+          "name": "Captain",
+          "type": "Captain",
+          "seats": [null],
+          "actions": [
+            {
+              "id": "save-cha",
+              "name": "CHA save",
+              "kind": "roll",
+              "type": "CHA",
+              "rolls": [
+                {
+                  "label": "CHA save",
+                  "type": "CHA",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "give-orders",
+              "name": "Give orders",
+              "kind": "utility",
+              "description": "Choose another crew member to act on your turn; resolve the action manually without advancing normal initiative."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "pilot",
+          "name": "Pilot",
+          "type": "Pilot",
+          "seats": ["mara-quill"],
+          "actions": [
+            {
+              "id": "save-pilot",
+              "name": "PILOT save",
+              "kind": "roll",
+              "type": "PILOT",
+              "rolls": [
+                {
+                  "label": "PILOT save",
+                  "type": "PILOT",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-str",
+              "name": "STR save",
+              "kind": "roll",
+              "type": "STR",
+              "rolls": [
+                {
+                  "label": "STR save",
+                  "type": "STR",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-dex",
+              "name": "DEX save",
+              "kind": "roll",
+              "type": "DEX",
+              "rolls": [
+                {
+                  "label": "DEX save",
+                  "type": "DEX",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "pilot-dash",
+              "name": "Pilot / Dash",
+              "kind": "utility",
+              "description": "Move the ship up to its effective Speed in km. Use the separate +1G or -1G buttons as appropriate; the extension does not move map tokens.",
+              "gs": {
+                "amount": 1,
+                "on": "button"
+              }
+            },
+            {
+              "id": "reduce-g",
+              "name": "Adjust thrust (-1G)",
+              "kind": "utility",
+              "description": "Companion to Pilot / Dash: reduce current Gs by 1.",
+              "gs": {
+                "amount": -1,
+                "on": "button"
+              }
+            },
+            {
+              "id": "thrust-control",
+              "name": "Thrust control (-5G)",
+              "kind": "utility",
+              "description": "Reduce current Gs by 5.",
+              "gs": {
+                "amount": -5
+              }
+            },
+            {
+              "id": "dodge",
+              "name": "Dodge (+5G)",
+              "kind": "utility",
+              "description": "Add 5G and gain advantage on DEX saves until the start of this crew member's next turn. While Optimize Routing is active, manually correct the cost to +2G.",
+              "gs": {
+                "amount": 5
+              },
+              "grantsEffects": [
+                {
+                  "id": "dodging",
+                  "name": "Dodging",
+                  "type": "Maneuver",
+                  "description": "",
+                  "duration": {
+                    "unit": "crewTurns",
+                    "count": 1
+                  },
+                  "rolls": [
+                    {
+                      "rollType": "DEX",
+                      "advantage": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "atp-jump",
+              "name": "ATP Jump",
+              "kind": "utility",
+              "description": "Spend 1 ATP Jump; requires ATP Jump route. GM must remove the route effect after use and adjudicate movement. Cannot jump while a navigation damage effect forbids it.",
+              "ammunition": {
+                "name": "ATP Jumps",
+                "cost": 1
+              },
+              "requiresEffects": ["atp-route"]
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "navigator",
+          "name": "Navigator",
+          "type": "Navigator",
+          "seats": ["tess-vale"],
+          "actions": [
+            {
+              "id": "save-int",
+              "name": "INT save",
+              "kind": "roll",
+              "type": "INT",
+              "rolls": [
+                {
+                  "label": "INT save",
+                  "type": "INT",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-wis",
+              "name": "WIS save",
+              "kind": "roll",
+              "type": "WIS",
+              "rolls": [
+                {
+                  "label": "WIS save",
+                  "type": "WIS",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-con",
+              "name": "CON save",
+              "kind": "roll",
+              "type": "CON",
+              "rolls": [
+                {
+                  "label": "CON save",
+                  "type": "CON",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "save-cha",
+              "name": "CHA save",
+              "kind": "roll",
+              "type": "CHA",
+              "rolls": [
+                {
+                  "label": "CHA save",
+                  "type": "CHA",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "savingThrow": true
+            },
+            {
+              "id": "plan-atp",
+              "name": "Plan ATP Jump",
+              "kind": "utility",
+              "description": "Add ATP Jump route. The route persists until used; GM removes it after a jump. Repeated planning should not stack routes.",
+              "grantsEffects": [
+                {
+                  "id": "atp-route",
+                  "name": "ATP Jump route",
+                  "type": "Navigation",
+                  "description": ""
+                }
+              ]
+            },
+            {
+              "id": "evasive-route",
+              "name": "Plan an Evasive route",
+              "kind": "utility",
+              "description": "Advantage on DEX saves until the start of this crew member's next turn.",
+              "grantsEffects": [
+                {
+                  "id": "evasive-route",
+                  "name": "Evasive route",
+                  "type": "Navigation",
+                  "description": "",
+                  "duration": {
+                    "unit": "crewTurns",
+                    "count": 1
+                  },
+                  "rolls": [
+                    {
+                      "rollType": "DEX",
+                      "advantage": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "optimize-routing",
+              "name": "Optimize Routing",
+              "kind": "utility",
+              "description": "Until the start of this crew member's next turn, halve G costs for actions that add Gs, rounded down. Manual: Dodge costs +2G; a +1G increment costs 0G. Adjust using the G buttons.",
+              "grantsEffects": [
+                {
+                  "id": "optimized-routing",
+                  "name": "Optimize Routing",
+                  "type": "Navigation",
+                  "description": "",
+                  "duration": {
+                    "unit": "crewTurns",
+                    "count": 1
+                  }
+                }
+              ]
+            },
+            {
+              "id": "scan-area",
+              "name": "Scan area",
+              "kind": "roll",
+              "type": "Search",
+              "rolls": [
+                {
+                  "label": "Scan area",
+                  "type": "Search",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "description": "Search roll: obtain additional surrounding-area data or find special areas. GM supplies results."
+            },
+            {
+              "id": "ship-scan",
+              "name": "Ship Scan",
+              "kind": "roll",
+              "type": "Search",
+              "rolls": [
+                {
+                  "label": "Ship Scan",
+                  "type": "Search",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                }
+              ],
+              "description": "Search roll: detect and identify nearby ships. GM supplies results."
+            },
+            {
+              "id": "counterhack",
+              "name": "Counterhack",
+              "kind": "remove-effect",
+              "effectType": "Hack",
+              "activationRoll": {
+                "label": "Hack",
+                "type": "Hack",
+                "notation": "1d20"
+              },
+              "description": "Roll Hack, then select a Hack effect to remove. GM adjudicates success before confirmation; cancel if unsuccessful."
+            },
+            {
+              "id": "hack",
+              "name": "Hack",
+              "kind": "utility",
+              "description": "Roll Hack, choose a target ship, then confirm Target Locked if successful. GM adjudicates the roll and what Target Locked does; no numerical effect or duration was supplied.",
+              "activationRoll": {
+                "label": "Hack",
+                "type": "Hack",
+                "notation": "1d20"
+              },
+              "shipSelector": true,
+              "grantsEffects": [
+                {
+                  "id": "target-locked",
+                  "name": "Target Locked",
+                  "type": "Hack",
+                  "description": "Target Locked hack effect. GM adjudicates its benefits; remove with Counterhack or GM dismissal."
+                }
+              ]
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        },
+        {
+          "id": "artillery",
+          "name": "Artillery",
+          "type": "Artillery",
+          "seats": ["bram-coil", null],
+          "actions": [
+            {
+              "id": "pdc",
+              "name": "PDC",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "pdc Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d12",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "Attack 1d20 + Attack modifier; damage 1d12. No ammunition or cooldown. GM handles normal/long range.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "1 / 2 km"
+                }
+              ]
+            },
+            {
+              "id": "covering-fire",
+              "name": "Covering Fire",
+              "kind": "utility",
+              "description": "Any range. Prevents torpedo launches and deals damage on approach within 2 km. GM adjudicates the covered lane, duration, launch restrictions and damage; no damage formula was supplied.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "Any"
+                },
+                {
+                  "name": "Approach",
+                  "value": "2 km"
+                }
+              ]
+            },
+            {
+              "id": "railgun",
+              "name": "Ballistic Railgun",
+              "kind": "roll",
+              "type": "Attack",
+              "rolls": [
+                {
+                  "label": "Attack",
+                  "type": "railgun Attack",
+                  "notation": "1d20",
+                  "kind": "hitRoll",
+                  "damage": false
+                },
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "1d8",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "One railgun cooldown slot of 1. Attack 1d20 + Attack; damage 1d8.",
+              "values": [
+                {
+                  "name": "Range",
+                  "value": "4 / 20 km"
+                }
+              ],
+              "cooldown": 1
+            },
+            {
+              "id": "fission-torpedo",
+              "name": "Launch Fission Torpedo",
+              "kind": "roll",
+              "type": "Attack",
+              "activation": "use",
+              "cooldown": [2, 2],
+              "cooldownName": "torpedo-bays",
+              "ammunition": {
+                "name": "Fission Torpedos",
+                "cost": 1
+              },
+              "values": [
+                {
+                  "name": "Torpedo speed",
+                  "value": "4 km"
+                },
+                {
+                  "name": "Area",
+                  "value": "1 km"
+                },
+                {
+                  "name": "Cooldown slots",
+                  "value": "Torpedo Bay 1 / Torpedo Bay 2"
+                }
+              ],
+              "rolls": [
+                {
+                  "label": "Damage",
+                  "type": "Damage",
+                  "notation": "3d8",
+                  "kind": "effectRoll",
+                  "damage": true
+                }
+              ],
+              "description": "Use launches one torpedo, spends one round of ammunition and starts one available bay's cooldown of 2. Resolve 3d8 damage on impact. No attack roll was specified; GM handles travel, area and impact."
+            }
+          ],
+          "selectedEffects": {},
+          "cooldowns": {}
+        }
+      ]
+    }
+  ],
+  "crew": [
+    {
+      "id": "iji",
+      "name": "Iji",
+      "ship": "naranja-mecanica",
+      "role": "Drone operator / navigator",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 2,
+        "DEX": 0,
+        "CON": 2,
+        "INT": 0,
+        "WIS": 5,
+        "CHA": 1,
+        "PILOT": 0,
+        "Search": 5,
+        "Hack": -2,
+        "Attack": 5,
+        "Repair": 5
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "nemo",
+      "name": "Nemo",
+      "ship": "naranja-mecanica",
+      "role": "Technician / comms",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": -1,
+        "DEX": 1,
+        "CON": 4,
+        "INT": 5,
+        "WIS": 2,
+        "CHA": 0,
+        "PILOT": 3,
+        "Search": 3,
+        "Hack": 5,
+        "Attack": 5,
+        "Repair": 5
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "ordhel",
+      "name": "Ordhel",
+      "ship": "naranja-mecanica",
+      "role": "Artillery / pilot",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 5,
+        "DEX": 1,
+        "CON": 4,
+        "INT": 2,
+        "WIS": 0,
+        "CHA": -1,
+        "PILOT": 3,
+        "Search": 4,
+        "Hack": 2,
+        "Attack": 5,
+        "Repair": 4
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "lavos",
+      "name": "Lavos",
+      "ship": "naranja-mecanica",
+      "role": "Captain / pilot",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 0,
+        "DEX": 3,
+        "CON": 4,
+        "INT": -1,
+        "WIS": 1,
+        "CHA": 4,
+        "PILOT": 3,
+        "Search": 3,
+        "Hack": 1,
+        "Attack": 5,
+        "Repair": 1
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "big-johnny",
+      "name": "Big Johnny",
+      "ship": "naranja-mecanica",
+      "role": "Pilot / artillery",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 7,
+        "DEX": 3,
+        "CON": 5,
+        "INT": 0,
+        "WIS": 1,
+        "CHA": 2,
+        "PILOT": 3,
+        "Search": 2,
+        "Hack": -1,
+        "Attack": 6,
+        "Repair": 4
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "ace",
+      "name": "Ace",
+      "ship": "naranja-mecanica",
+      "role": "Navigator / comms",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": -1,
+        "DEX": 1,
+        "CON": 2,
+        "INT": 2,
+        "WIS": 4,
+        "CHA": 2,
+        "PILOT": 1,
+        "Search": 2,
+        "Hack": 0,
+        "Attack": 4,
+        "Repair": 0
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "vera-kest",
+      "name": "Vera Kest",
+      "ship": "rustbite",
+      "role": "Pilot",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 1,
+        "DEX": 2,
+        "CON": 3,
+        "INT": 1,
+        "WIS": 1,
+        "CHA": 0,
+        "PILOT": 3,
+        "Search": 2,
+        "Hack": 1,
+        "Attack": 3,
+        "Repair": 2
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "dax-rusk",
+      "name": "Dax Rusk",
+      "ship": "rustbite",
+      "role": "Co-pilot / gunner",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 2,
+        "DEX": 1,
+        "CON": 2,
+        "INT": 1,
+        "WIS": 0,
+        "CHA": -1,
+        "PILOT": 2,
+        "Search": 2,
+        "Hack": 2,
+        "Attack": 4,
+        "Repair": 3
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "sela-venn",
+      "name": "Sela Venn",
+      "ship": "false-courtesy",
+      "role": "Pilot",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 0,
+        "DEX": 3,
+        "CON": 2,
+        "INT": 1,
+        "WIS": 2,
+        "CHA": 1,
+        "PILOT": 3,
+        "Search": 3,
+        "Hack": 2,
+        "Attack": 3,
+        "Repair": 1
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "orin-pike",
+      "name": "Orin Pike",
+      "ship": "false-courtesy",
+      "role": "Co-pilot / gunner",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 1,
+        "DEX": 2,
+        "CON": 3,
+        "INT": 2,
+        "WIS": 1,
+        "CHA": 0,
+        "PILOT": 2,
+        "Search": 2,
+        "Hack": 1,
+        "Attack": 4,
+        "Repair": 2
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "mara-quill",
+      "name": "Mara Quill",
+      "ship": "second-mortgage",
+      "role": "Pilot / relief captain",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 1,
+        "DEX": 2,
+        "CON": 3,
+        "INT": 1,
+        "WIS": 1,
+        "CHA": 3,
+        "PILOT": 3,
+        "Search": 2,
+        "Hack": 1,
+        "Attack": 3,
+        "Repair": 2
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "tess-vale",
+      "name": "Tess Vale",
+      "ship": "second-mortgage",
+      "role": "Navigator / hacker",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 0,
+        "DEX": 1,
+        "CON": 2,
+        "INT": 3,
+        "WIS": 3,
+        "CHA": 1,
+        "PILOT": 1,
+        "Search": 4,
+        "Hack": 4,
+        "Attack": 2,
+        "Repair": 3
+      },
+      "stationActions": {}
+    },
+    {
+      "id": "bram-coil",
+      "name": "Bram Coil",
+      "ship": "second-mortgage",
+      "role": "Artillery",
+      "disabled": false,
+      "initiativeRoll": "1d20",
+      "initiative": null,
+      "initiativeToken": null,
+      "modifiers": {
+        "STR": 3,
+        "DEX": 1,
+        "CON": 3,
+        "INT": 1,
+        "WIS": 0,
+        "CHA": -1,
+        "PILOT": 2,
+        "Search": 2,
+        "Hack": 0,
+        "Attack": 4,
+        "Repair": 2
+      },
+      "stationActions": {}
+    }
+  ],
+  "encounters": [
+    {
+      "id": "naranja-mecanica-debt-collection",
+      "name": "Debt Collection — Naranja Mecanica",
+      "shipIds": [
+        "naranja-mecanica",
+        "rustbite",
+        "false-courtesy",
+        "second-mortgage"
+      ],
+      "round": 1,
+      "turn": 0,
+      "currentCrewId": null,
+      "running": false
+    }
+  ]
+}

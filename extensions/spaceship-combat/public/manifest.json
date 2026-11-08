@@ -1,6 +1,6 @@
 {
   "name": "Crowbear Spaceship Combat",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "manifest_version": 1,
   "description": "Spaceship encounters, crew stations and effect-aware Dice+ rolls. Player ships sync to your scene.",
   "background_url": "/background.html",

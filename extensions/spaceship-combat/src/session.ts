@@ -1,6 +1,7 @@
 import { createDicePlusClient } from "@crowbear/dice-plus";
 import OBR from "@owlbear-rodeo/sdk";
 import { allData, execute, type State } from "./commands";
+import { defaultFleet, defaultGm } from "./defaults";
 import {
   CommandError,
   describeError,
@@ -8,7 +9,6 @@ import {
   makeDiagnostic,
 } from "./diagnostics";
 import { type Crew, randomInitiative, type Ship } from "./rules";
-import { crew, ships } from "./sample-data";
 import {
   type Command,
   type Encounter,
@@ -45,26 +45,9 @@ export function demoState(): State {
       controllerId: "demo",
       revision: 0,
       round: 1,
-      ships: structuredClone(ships.filter((s) => s.kind === "Player")),
-      crew: structuredClone(crew.filter((c) => c.ship === "kestrel")),
+      ...defaultFleet("Player"),
     },
-    gm: {
-      version: 1,
-      ships: structuredClone(ships.filter((s) => s.kind === "NPC")),
-      crew: structuredClone(crew.filter((c) => c.ship !== "kestrel")),
-      encounters: [
-        {
-          id: "relay",
-          name: "Ambush at the relay",
-          shipIds: ships.map((s) => s.id),
-          round: 1,
-          turn: 0,
-          currentCrewId: null,
-          running: true,
-        },
-      ],
-      activeEncounterId: "relay",
-    },
+    gm: defaultGm(),
   };
 }
 const emptyGm = (): GmState => ({

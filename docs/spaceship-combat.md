@@ -424,8 +424,12 @@ manage the shared fleet.
 
 Player ship IDs referenced by an encounter must exist in the current scene.
 Saved encounters refer to live ships, not independent cloned instances. The first
-scene initialization includes a player freighter and crew; the GM library includes
-two NPC ships/crew and a sample encounter.
+scene initialization uses the bundled [Naranja library](../extensions/spaceship-combat/src/default-library.json):
+Naranja Mecanica and its six player crew, three NPC ships and seven NPC crew,
+and the paused **Debt Collection — Naranja Mecanica** encounter at round 1.
+Existing saves are preserved. The GM can use **Library JSON → Replace with Naranja
+preset** to replace the whole library and progress without uploading JSON; export
+a backup first. This still requires a successful scene save.
 
 ### Ammunition and Autonomy
 

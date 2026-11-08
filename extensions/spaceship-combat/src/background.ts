@@ -1,16 +1,15 @@
 import OBR from "@owlbear-rodeo/sdk";
 import { z } from "zod";
 import { execute } from "./commands";
+import { defaultFleet, defaultGm } from "./defaults";
 import {
   type DiagnosticContext,
   describeError,
   jsonBytes,
   makeDiagnostic,
 } from "./diagnostics";
-import { ships as sampleShips, crew as samplesCrew } from "./sample-data";
 import {
   commandSchema,
-  type GmState,
   gmSchema,
   type PublicState,
   publicSchema,
@@ -18,25 +17,6 @@ import {
 import { assembler, KEY, REQUEST, RESPONSE, storageKey } from "./transport";
 
 const envelope = z.object({ sessionId: z.string(), command: commandSchema });
-function initialGm(): GmState {
-  return {
-    version: 1,
-    ships: structuredClone(sampleShips.filter((s) => s.kind === "NPC")),
-    crew: structuredClone(samplesCrew.filter((c) => c.ship !== "kestrel")),
-    encounters: [
-      {
-        id: "relay",
-        name: "Ambush at the relay",
-        shipIds: sampleShips.map((s) => s.id),
-        round: 1,
-        turn: 0,
-        currentCrewId: null,
-        running: true,
-      },
-    ],
-    activeEncounterId: "relay",
-  };
-}
 if (OBR.isAvailable)
   OBR.onReady(async () => {
     const connection = await OBR.player.getConnectionId();
@@ -54,7 +34,7 @@ if (OBR.isAvailable)
     const assemble = assembler();
     const getGm = () => {
       const raw = localStorage.getItem(localKey);
-      return raw ? gmSchema.parse(JSON.parse(raw)) : initialGm();
+      return raw ? gmSchema.parse(JSON.parse(raw)) : defaultGm();
     };
     async function load() {
       const ticket = ++generation;
@@ -73,12 +53,7 @@ if (OBR.isAvailable)
           controllerId: connection,
           revision: 0,
           round: 1,
-          ships: structuredClone(
-            sampleShips.filter((s) => s.kind === "Player"),
-          ),
-          crew: structuredClone(
-            samplesCrew.filter((c) => c.ship === "kestrel"),
-          ),
+          ...defaultFleet("Player"),
         };
         // Fail before sharing a scene if private storage is unavailable.
         localStorage.setItem(localKey, JSON.stringify(getGm()));
