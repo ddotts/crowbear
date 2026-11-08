@@ -56,8 +56,19 @@ extension and Dice+ in the room and open a scene. The GM initializes the sample
 player ship and a private library with two NPC ships and a sample encounter.
 
 The compact panel supports encounters, crew assignments, damage effects,
-station configurations, AC/maxG/Speed modifiers, Markdown descriptions and Dice+
-rolls. In Owlbear, player ships/crew sync to scene metadata; NPCs and encounters
+station configurations, AC/maxG/Speed modifiers, Markdown descriptions, shared
+independent cooldown slots and named pools shared between station actions,
+always-visible action values, separate hit/effect rolls and Dice+ rolls.
+Crew initiative includes forward/back navigation, editable totals, ship colours,
+and an NPC-only batch RNG button. Named ammunition pools are shared within each
+ship; Autonomy appears on status, and actions can separate Use, Hit and Damage.
+GM and player crew views show quick actions, compact ship status, Gs, saving
+throws and seat switching. Typed effects support expiry, station roll blocking,
+action requirements and GM/action removal. Actions can grant effects to a selected
+ship; weapon/ship CAT effects and one-roll CAT overrides adjust damage dice.
+Target/removal selectors open after activation rolls and costs; cancellation
+keeps ammunition and cooldowns spent.
+In Owlbear, player ships/crew sync to scene metadata; NPCs and encounters
 persist in the GM browser. Outside Owlbear, changes are an unsaved demo.
 See the [storage, JSON and rules contract](docs/spaceship-combat.md), including
 operating limits and rules to review. Use **Import → Export** for backups.

@@ -14,7 +14,7 @@ page.on("pageerror", (error) => errors.push(error.message));
 const host = `<!doctype html><html><body style="display:flex;gap:10px;background:#ddd"><script>
 const origin=location.origin;
 const appBase=${JSON.stringify(new URL(base).pathname.replace(/\/$/, "") + "/")};
-window.metadata={};window.rollRequests=[];window.remotePayloads=[];window.failSave=false;window.sceneReady=true;
+window.metadata={};window.rollRequests=[];window.remotePayloads=[];window.failSave=false;window.sceneReady=true;window.holdRoll=false;window.releaseRoll=null;
 const clients=[];
 function send(client,id,data){client.frame.contentWindow.postMessage({id,data},origin);}
 function emit(id,data){for(const client of clients)send(client,id,data);}
@@ -43,7 +43,7 @@ window.addEventListener('message',event=>{
    const dice={connection:'dice-service'};
    if(channel==='dice-plus/isReady' && !data.ready)broadcast(dice,channel,{requestId:data.requestId,ready:true,timestamp:Date.now()},'ALL');
    if(channel==='dice-plus/validate-notation' && data.valid===undefined)broadcast(dice,channel,{requestId:data.requestId,notation:data.notation,valid:true,timestamp:Date.now()},'ALL');
-   if(channel==='dice-plus/roll-request'){window.rollRequests.push(data);broadcast(dice,data.source+'/roll-result',{rollId:data.rollId,playerId:data.playerId,playerName:data.playerName,rollTarget:data.rollTarget,timestamp:data.timestamp,result:{rollId:data.rollId,diceNotation:data.diceNotation,totalValue:12,rollSummary:'Fixture result',groups:[]}},'ALL');}
+   if(channel==='dice-plus/roll-request'){window.rollRequests.push(data);const reply=()=>broadcast(dice,data.source+'/roll-result',{rollId:data.rollId,playerId:data.playerId,playerName:data.playerName,rollTarget:data.rollTarget,timestamp:data.timestamp,result:{rollId:data.rollId,diceNotation:data.diceNotation,totalValue:12,rollSummary:'Fixture result',groups:[]}},'ALL');if(window.holdRoll)window.releaseRoll=reply;else reply();}
    break;
  }
  default:break;
@@ -69,7 +69,36 @@ await gm
   .locator(".connection-status")
   .getByText("Scene connected", { exact: false })
   .waitFor();
+await player
+  .locator(".connection-status")
+  .getByText("Scene connected", { exact: false })
+  .waitFor();
+await player
+  .getByRole("button", { name: "Ships", exact: true })
+  .first()
+  .click();
+await second
+  .getByRole("button", { name: "Ships", exact: true })
+  .first()
+  .click();
 await player.locator(".ship-heading h2").waitFor();
+// Choose the observed ship explicitly: the GM can load its private fleet before
+// scene initialization, so its initial selection may be an NPC.
+await gm.getByRole("button", { name: "Ships", exact: true }).first().click();
+await gm.locator("#ship-select").selectOption("kestrel");
+await gm.getByRole("button", { name: "Run", exact: true }).click();
+assert.equal(await gm.locator(".initiative-entry").count(), 5);
+await gm
+  .getByRole("spinbutton", { name: "Initiative for Mara Voss", exact: true })
+  .fill("25");
+await gm
+  .getByRole("spinbutton", { name: "Initiative for Mara Voss", exact: true })
+  .press("Tab");
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].crew.find((c) => c.id === "mara")
+      .initiative === 25,
+);
 assert.equal(await player.locator("#role").isDisabled(), true);
 assert.doesNotMatch(
   await player.locator("main").innerText(),
@@ -115,26 +144,218 @@ assert.equal(
   true,
 );
 assert.match(await gm.locator(".configuration").first().innerText(), /Boost/);
-// Fire once as GM, once as player. The real Dice+ bridge is used against a
-// protocol fixture; physical dice and service-side audience routing need a room.
+// Hit rolls consume a station-wide cooldown; effect rolls stay available.
 for (const panel of [gm, player]) {
   await panel.locator('[data-station-panel="1"] > summary').click();
-  await panel.locator('[data-action="roll"][data-value="fire"]').click();
-  await panel
-    .locator(".notice")
-    .getByText("Roll complete.", { exact: false })
-    .waitFor();
 }
+const hit = '[data-action="roll"][data-value="fire"][data-roll-index="0"]';
+const effect = '[data-action="roll"][data-value="fire"][data-roll-index="1"]';
+await gm.locator(hit).click();
+await gm
+  .locator(".notice")
+  .getByText("Roll complete.", { exact: false })
+  .waitFor();
+await page.waitForFunction(
+  () =>
+    Object.values(
+      window.metadata,
+    )[0]?.ships[0].stations[1].cooldowns.fire?.join(",") === "3,0",
+);
+assert.equal(await player.locator(hit).getAttribute("aria-disabled"), "false");
+await player.locator(hit).click();
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].ships[0].stations[1].cooldowns.fire?.join(
+      ",",
+    ) === "3,4",
+);
+assert.equal(await player.locator(hit).getAttribute("aria-disabled"), "true");
+assert.equal(
+  await player.locator(effect).getAttribute("aria-disabled"),
+  "false",
+);
+await player.locator(hit).click({ button: "right", force: true });
+await player.getByRole("button", { name: "normal", exact: true }).click();
+await player
+  .locator(".notice")
+  .getByText("Roll complete.", { exact: false })
+  .waitFor();
+await player.locator(effect).click();
+await page.waitForFunction(() => window.rollRequests.length === 4);
+await player
+  .locator(".notice")
+  .getByText("Roll complete.", { exact: false })
+  .waitFor();
 const rolls = await page.evaluate(() => window.rollRequests);
 assert.deepEqual(
   rolls.map((r) => r.rollTarget),
-  ["gm_only", "everyone"],
+  ["gm_only", "everyone", "everyone", "everyone"],
 );
-assert.ok(
-  rolls.every(
-    (r) => r.diceNotation.includes("kl") && r.diceNotation.includes("#Damage"),
+assert.deepEqual(
+  rolls.map((r) => r.diceNotation),
+  ["3d6kl2+2#Hit", "3d6kl2+2#Hit", "2d6+2#Hit", "1d6-1#Damage"],
+);
+assert.deepEqual(
+  await page.evaluate(
+    () => Object.values(window.metadata)[0].ships[0].stations[1].cooldowns.fire,
   ),
+  [3, 4],
 );
+// Batch initiative uses local RNG, individual initiative uses Dice+ totals.
+await gm.getByRole("button", { name: "Run", exact: true }).click();
+await gm
+  .getByRole("button", { name: "Roll NPC initiatives · RNG", exact: true })
+  .click();
+await gm
+  .locator(".notice")
+  .getByText("Rolled 2 NPC initiatives with RNG.", { exact: true })
+  .waitFor();
+assert.equal(await page.evaluate(() => window.rollRequests.length), 4);
+assert.equal(await gm.locator('.crew-order [data-action="actor"]').count(), 5);
+assert.equal(
+  await gm
+    .getByRole("spinbutton", { name: "Initiative for Mara Voss", exact: true })
+    .inputValue(),
+  "25",
+);
+assert.equal(await gm.locator('.crew-order [aria-current="step"]').count(), 1);
+const active = await gm
+  .locator('.crew-order [aria-current="step"]')
+  .getAttribute("data-value");
+await gm.getByRole("button", { name: "Next →", exact: true }).click();
+await page.waitForFunction(
+  (prior) =>
+    document
+      .querySelector('iframe[name="gm"]')
+      .contentDocument.querySelector('.crew-order [aria-current="step"]')
+      ?.dataset.value !== prior,
+  active,
+);
+
+assert.notEqual(
+  await gm
+    .locator('.crew-order [aria-current="step"]')
+    .getAttribute("data-value"),
+  active,
+);
+await gm.getByRole("button", { name: "← Back", exact: true }).click();
+await page.waitForFunction(
+  (prior) =>
+    document
+      .querySelector('iframe[name="gm"]')
+      .contentDocument.querySelector('.crew-order [aria-current="step"]')
+      ?.dataset.value === prior,
+  active,
+);
+
+assert.equal(
+  await gm
+    .locator('.crew-order [aria-current="step"]')
+    .getAttribute("data-value"),
+  active,
+);
+for (const direction of ["Next →", "Next →", "← Back", "← Back"]) {
+  const previous = await gm
+    .locator('.crew-order [aria-current="step"]')
+    .getAttribute("data-value");
+  await gm.getByRole("button", { name: direction, exact: true }).click();
+  await page.waitForFunction(
+    (prior) =>
+      document
+        .querySelector('iframe[name="gm"]')
+        .contentDocument.querySelector('.crew-order [aria-current="step"]')
+        ?.dataset.value !== prior,
+    previous,
+  );
+  await gm.locator("main:not([inert])").waitFor();
+  assert.equal(
+    await gm.locator(".crew-order").evaluate((el) => {
+      const outer = el.getBoundingClientRect(),
+        inner = el
+          .querySelector('[aria-current="step"]')
+          .getBoundingClientRect();
+      return inner.top >= outer.top - 1 && inner.bottom <= outer.bottom + 1;
+    }),
+    true,
+  );
+}
+await gm.locator('[data-action="actor"][data-value="ivo"]').click();
+assert.equal(await gm.locator('.crew-order [aria-pressed="true"]').count(), 3);
+assert.equal(await gm.locator(".crew-actions .ship-snapshot").count(), 1);
+assert.equal(await gm.locator(hit).count(), 1);
+
+await gm.getByRole("button", { name: "Round +1", exact: true }).click();
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].ships[0].stations[1].cooldowns.fire?.join(
+      ",",
+    ) === "2,3",
+);
+await gm.getByRole("button", { name: "Edit", exact: true }).click();
+await gm.locator("#encounter-name").fill("Relay — crew turns");
+await gm.getByRole("button", { name: "Save encounter", exact: true }).click();
+await gm.locator(".notice").getByText("Saved.", { exact: true }).waitFor();
+const savedEncounter = await page.evaluate(() =>
+  JSON.parse(
+    localStorage.getItem("com.ddotts.crowbear.spaceship-combat/gm/qa-room"),
+  ).encounters.find((e) => e.id === "relay"),
+);
+assert.equal(savedEncounter.round, 2);
+assert.equal(savedEncounter.cooldownRound, 2);
+await player.getByRole("button", { name: "Actions", exact: true }).click();
+await player.locator("#crew-self").selectOption("ivo");
+assert.equal(await player.locator(hit).getAttribute("aria-disabled"), "true");
+await player
+  .getByRole("button", { name: "Roll initiative", exact: true })
+  .click();
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].crew.find((c) => c.id === "ivo")
+      .initiative === 12,
+);
+await player.getByRole("button", { name: "Switch seat", exact: true }).click();
+await player.locator('[data-form="move"]').waitFor();
+await page.screenshot({ path: "/tmp/crowbear-crew-actions.png" });
+await player.locator("#destination").selectOption("kestrel:1:1");
+await player.locator('[data-form="move"] button.primary').click();
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].ships[0].stations[1].seats[1] === "ivo",
+);
+assert.deepEqual(
+  await page.evaluate(
+    () => Object.values(window.metadata)[0].ships[0].stations[1].cooldowns.fire,
+  ),
+  [2, 3],
+);
+
+await player
+  .getByRole("button", { name: "Ships", exact: true })
+  .first()
+  .click();
+// Simultaneous seats cannot dispatch two normal hits from the same station.
+await gm.getByRole("button", { name: "Round +1", exact: true }).click();
+await gm.getByRole("button", { name: "Round +1", exact: true }).click();
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].ships[0].stations[1].cooldowns.fire?.join(
+      ",",
+    ) === "0,1",
+);
+await second.getByRole("button", { name: "Stations", exact: true }).click();
+await second.locator('[data-station-panel="1"] > summary').click();
+await Promise.all([player.locator(hit).click(), second.locator(hit).click()]);
+await page.waitForFunction(() => window.rollRequests.length === 6);
+await page.waitForFunction(() =>
+  [...document.querySelectorAll("iframe")]
+    .filter((f) => f.name.startsWith("player"))
+    .some((f) =>
+      f.contentDocument
+        .querySelector(".notice")
+        ?.textContent.includes("on cooldown"),
+    ),
+);
+assert.equal(await page.evaluate(() => window.rollRequests.length), 6);
 // Persisted player state reloads from scene; private NPC data stays local.
 await gm.getByRole("button", { name: "Ships", exact: true }).first().click();
 await gm.locator("#ship-select").selectOption("shrike");
@@ -161,6 +382,16 @@ assert.equal(
 await gm.getByRole("button", { name: "Import", exact: true }).click();
 await gm.getByRole("button", { name: "Example JSON", exact: true }).click();
 const library = JSON.parse(await gm.locator("#json").inputValue());
+library.ships
+  .find((s) => s.id === "kestrel")
+  .stations[1].actions.find((a) => a.id === "target-mode")
+  .effects.find((e) => e.id === "focus").duration = {
+  unit: "crewTurns",
+  count: 1,
+};
+library.ships
+  .find((s) => s.id === "kestrel")
+  .ammunition.find((pool) => pool.name === "Torpedoes").current = 1;
 library.ships.find((s) => s.id === "shrike").name =
   "SECRET NPC <img src=x onerror=window.compromised=true>";
 library.ships.find(
@@ -182,7 +413,7 @@ assert.equal(
 );
 await player.getByRole("button", { name: "Status", exact: true }).click();
 await player
-  .locator(".effect-list .description")
+  .locator(".effect-list .effect-entry")
   .first()
   .locator("summary")
   .click();
@@ -243,8 +474,280 @@ assert.equal(
   ),
   2,
 );
+await player.getByRole("button", { name: "Stations", exact: true }).click();
+if (
+  (await player.locator('[data-station-panel="1"]').getAttribute("open")) ===
+  null
+)
+  await player.locator('[data-station-panel="1"] > summary').click();
+await player
+  .getByRole("button", { name: "Use Launch torpedo", exact: true })
+  .click();
+await player
+  .locator(".notice")
+  .getByText("Simulated scene save failure", { exact: true })
+  .waitFor();
+assert.equal(
+  await page.evaluate(
+    () =>
+      Object.values(window.metadata)[0].ships[0].ammunition.find(
+        (pool) => pool.name === "Torpedoes",
+      ).current,
+  ),
+  1,
+);
+assert.equal(
+  await page.evaluate(
+    () =>
+      Object.values(window.metadata)[0].ships[0].stations[1].cooldowns[
+        "named:launchers"
+      ],
+  ),
+  undefined,
+);
 await page.evaluate(() => (window.failSave = false));
 await page.screenshot({ path: "/tmp/crowbear-room-fixture.png" });
+const beforeAmmoRolls = await page.evaluate(() => window.rollRequests.length);
+for (const panel of [player, second]) {
+  await panel.getByRole("button", { name: "Stations", exact: true }).click();
+  if (
+    (await panel.locator('[data-station-panel="1"]').getAttribute("open")) ===
+    null
+  )
+    await panel.locator('[data-station-panel="1"] > summary').click();
+}
+await Promise.all(
+  [player, second].map((panel) =>
+    panel
+      .getByRole("button", { name: "Use Launch torpedo", exact: true })
+      .dispatchEvent("click"),
+  ),
+);
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].ships[0].ammunition.find(
+      (pool) => pool.name === "Torpedoes",
+    ).current === 0,
+);
+await player.locator("main:not([inert])").waitFor();
+await second.locator("main:not([inert])").waitFor();
+assert.equal(
+  await page.evaluate(() => window.rollRequests.length),
+  beforeAmmoRolls,
+);
+assert.equal(
+  await player
+    .getByRole("button", { name: "Use Launch torpedo", exact: true })
+    .isDisabled(),
+  true,
+);
+await player
+  .getByRole("button", { name: "Roll Launch torpedo hit", exact: true })
+  .click();
+await page.waitForFunction(
+  (n) => window.rollRequests.length === n + 1,
+  beforeAmmoRolls,
+);
+await player
+  .locator(".notice")
+  .getByText("Roll complete.", { exact: false })
+  .waitFor();
+await player
+  .getByRole("button", { name: "Roll Launch torpedo effect", exact: true })
+  .click();
+await page.waitForFunction(
+  (n) => window.rollRequests.length === n + 2,
+  beforeAmmoRolls,
+);
+assert.equal(
+  await page.evaluate(
+    () =>
+      Object.values(window.metadata)[0].ships[0].ammunition.find(
+        (pool) => pool.name === "Torpedoes",
+      ).current,
+  ),
+  0,
+);
+await page.screenshot({ path: "/tmp/crowbear-ammunition-room.png" });
+
+await player.getByRole("button", { name: "Stations", exact: true }).click();
+await player
+  .locator('[data-action="configure"][data-value="target-mode"]')
+  .click();
+await player.locator('[data-form="effects"]').waitFor();
+await player.locator('[data-form="effects"] input[value="focus"]').check();
+await player
+  .getByRole("button", { name: "Apply effects", exact: true })
+  .click();
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].ships[0].effectStates[
+      "station:weapons:target-mode:focus"
+    ]?.remaining === 1,
+);
+assert.equal(
+  await player
+    .getByRole("button", { name: "Roll Focused burst hit", exact: true })
+    .getAttribute("aria-disabled"),
+  "false",
+);
+await gm.getByRole("button", { name: "Run", exact: true }).click();
+for (let i = 0; i < 4; i++) {
+  await gm.getByRole("button", { name: "Next →", exact: true }).click();
+  await gm.locator("main:not([inert])").waitFor();
+  const current = await gm
+    .locator('.crew-order [aria-current="step"]')
+    .getAttribute("data-value");
+  if (current === "ivo") break;
+}
+await page.waitForFunction(
+  () =>
+    !Object.values(window.metadata)[0].ships[0].stations[1].selectedEffects[
+      "target-mode"
+    ].includes("focus"),
+);
+await player
+  .locator(
+    '[data-action="roll"][data-value="focused-burst"][aria-disabled="true"]',
+  )
+  .waitFor();
+await player
+  .locator('[data-action="configure"][data-value="target-mode"]')
+  .click();
+await player.locator('[data-form="effects"]').waitFor();
+// A player-applied effect persists in shared metadata and changes another panel's damage.
+await player.getByRole("button", { name: "Actions", exact: true }).click();
+await player.locator("#crew-self").selectOption("mara");
+await player.getByRole("button", { name: "Switch seat", exact: true }).click();
+await player.locator("#destination").selectOption("kestrel:0:0");
+await player.locator('[data-form="move"] button.primary').click();
+await page.waitForFunction(
+  () =>
+    Object.values(window.metadata)[0].ships[0].stations[0].seats[0] === "mara",
+);
+assert.equal(
+  await player
+    .locator('[aria-label="Target ship for Guided fire"] option')
+    .count(),
+  0,
+);
+const beforeSelectionRoll = await page.evaluate(() => {
+  window.holdRoll = true;
+  return window.rollRequests.length;
+});
+await player
+  .getByRole("button", { name: "Use Guided fire", exact: true })
+  .click();
+await page.waitForFunction(
+  (n) => window.rollRequests.length > n && Boolean(window.releaseRoll),
+  beforeSelectionRoll,
+);
+assert.equal(await player.locator("#target-ship-choice").count(), 0);
+assert.equal(
+  await page.evaluate(
+    () =>
+      Object.values(window.metadata)[0].ships[0].stations[0].cooldowns
+        .support[0],
+  ),
+  2,
+);
+assert.equal(
+  await page.evaluate(
+    () => Object.values(window.metadata)[0].ships[0].pendingSelections.length,
+  ),
+  1,
+);
+await page.evaluate(() => {
+  window.holdRoll = false;
+  window.releaseRoll();
+  window.releaseRoll = null;
+});
+await player.locator("#target-ship-choice").selectOption("kestrel");
+await player
+  .getByRole("button", { name: "Apply effects", exact: true })
+  .click();
+await page.waitForFunction(() =>
+  Object.values(window.metadata)[0].ships[0].receivedEffects?.some(
+    (entry) => entry.effect.id === "guided-fire",
+  ),
+);
+// Removal also rolls and spends first; cancelling preserves both the effect and costs.
+const beforeRemoval = await page.evaluate(() => {
+  const ship = Object.values(window.metadata)[0].ships[0];
+  return {
+    ammo: ship.ammunition.find((p) => p.name === "Autonomy").current,
+    damage: ship.parts[2].damage,
+  };
+});
+await player
+  .getByRole("button", { name: "Use Clear fault", exact: true })
+  .click();
+await player.locator("#remove-effect-choice").waitFor();
+assert.equal(
+  await page.evaluate(
+    () =>
+      Object.values(window.metadata)[0].ships[0].ammunition.find(
+        (p) => p.name === "Autonomy",
+      ).current,
+  ),
+  beforeRemoval.ammo - 1,
+);
+await player.getByRole("button", { name: "Cancel", exact: true }).click();
+await player.locator("#remove-effect-choice").waitFor({ state: "detached" });
+assert.equal(
+  await page.evaluate(
+    () =>
+      Object.values(window.metadata)[0].ships[0].ammunition.find(
+        (p) => p.name === "Autonomy",
+      ).current,
+  ),
+  beforeRemoval.ammo - 1,
+);
+assert.equal(
+  await page.evaluate(
+    () => Object.values(window.metadata)[0].ships[0].parts[2].damage,
+  ),
+  beforeRemoval.damage,
+);
+assert.equal(
+  await page.evaluate(
+    () => Object.values(window.metadata)[0].ships[0].pendingSelections.length,
+  ),
+  0,
+);
+await second.getByRole("button", { name: "Actions", exact: true }).click();
+await second.locator("#crew-self").selectOption("ivo");
+const catRoll = second.getByRole("button", {
+  name: "Roll Fire cannons effect",
+  exact: true,
+});
+await catRoll.locator(".cat-label").filter({ hasText: "CAT1" }).waitFor();
+const beforeCatRoll = await page.evaluate(() => window.rollRequests.length);
+await catRoll.click();
+await page.waitForFunction(
+  (n) => window.rollRequests.length > n,
+  beforeCatRoll,
+);
+assert.match(
+  await page.evaluate(() => window.rollRequests.at(-1).diceNotation),
+  /1d4/,
+);
+await catRoll.click({ button: "right" });
+await second.getByRole("button", { name: "Worsen", exact: true }).click();
+await second.getByRole("button", { name: "normal", exact: true }).click();
+await page.waitForFunction(
+  (n) => window.rollRequests.length > n + 1,
+  beforeCatRoll,
+);
+assert.match(
+  await page.evaluate(() => window.rollRequests.at(-1).diceNotation),
+  /1d6/,
+);
+assert.equal(
+  await page.evaluate(() => window.rollRequests.at(-1).rollTarget),
+  "everyone",
+);
+await player.getByRole("button", { name: "Ships", exact: true }).click();
 await player.getByRole("button", { name: "Stations", exact: true }).click();
 await player
   .locator('[data-action="configure"][data-value="target-mode"]')
@@ -267,6 +770,6 @@ assert.equal(
 assert.equal(await player.locator('[data-form="effects"]').count(), 0);
 assert.deepEqual(errors, []);
 console.log(
-  "SDK room fixture passed: background controller, two-player serialization, private GM storage, scene changes, theme, Dice+ audiences, effect persistence and save errors.",
+  "SDK room fixture passed: background controller, two-player serialization, private GM storage, scene changes, theme, Dice+ audiences, split rolls, independent cooldown slots, backward initiative, NPC batch/manual totals, tracker scrolling/colours, ammunition concurrency, crew quick actions/status, effect persistence and save errors.",
 );
 await browser.close();

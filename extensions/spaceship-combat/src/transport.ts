@@ -66,7 +66,12 @@ export const replySchema = z.object({
   sessionId: z.string(),
   error: z.string().optional(),
   notice: z.string().optional(),
+  selectionId: z.string().uuid().optional(),
   roll: z
-    .object({ notation: z.string(), target: z.enum(["gm_only", "everyone"]) })
+    .object({
+      notation: z.string(),
+      target: z.enum(["gm_only", "everyone"]),
+      initiativeToken: z.string().optional(),
+    })
     .optional(),
 });

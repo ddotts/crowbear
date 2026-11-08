@@ -24,6 +24,7 @@ function initialGm(): GmState {
         shipIds: sampleShips.map((s) => s.id),
         round: 1,
         turn: 0,
+        currentCrewId: null,
         running: true,
       },
     ],
@@ -65,6 +66,7 @@ if (OBR.isAvailable)
           ownerId: user,
           controllerId: connection,
           revision: 0,
+          round: 1,
           ships: structuredClone(
             sampleShips.filter((s) => s.kind === "Player"),
           ),
@@ -218,6 +220,7 @@ if (OBR.isAvailable)
               response = {
                 ...response,
                 notice: result.notice,
+                selectionId: result.selectionId,
                 roll: result.roll,
               };
             } catch (error) {

@@ -1,7 +1,7 @@
 import { createDicePlusClient } from "@crowbear/dice-plus";
 import OBR from "@owlbear-rodeo/sdk";
 import { allData, execute, type State } from "./commands";
-import type { Crew, Ship } from "./rules";
+import { type Crew, randomInitiative, type Ship } from "./rules";
 import { crew, ships } from "./sample-data";
 import {
   type Command,
@@ -21,6 +21,7 @@ import {
 } from "./transport";
 export type ViewState = {
   sessionId: string | null;
+  round: number;
   ships: Ship[];
   crew: Crew[];
   encounters: Encounter[];
@@ -37,6 +38,7 @@ export function demoState(): State {
       ownerId: "demo",
       controllerId: "demo",
       revision: 0,
+      round: 1,
       ships: structuredClone(ships.filter((s) => s.kind === "Player")),
       crew: structuredClone(crew.filter((c) => c.ship === "kestrel")),
     },
@@ -51,6 +53,7 @@ export function demoState(): State {
           shipIds: ships.map((s) => s.id),
           round: 1,
           turn: 0,
+          currentCrewId: null,
           running: true,
         },
       ],
@@ -87,6 +90,7 @@ export function createSession(update: (view: ViewState) => void) {
     const data = allData(demo);
     update({
       sessionId: "demo",
+      round: demo.shared.round,
       ...data,
       encounters: demo.gm.encounters,
       activeEncounterId: demo.gm.activeEncounterId,
@@ -117,6 +121,7 @@ export function createSession(update: (view: ViewState) => void) {
         controller = "";
         live = {
           sessionId: null,
+          round: 1,
           ships: gm.ships,
           crew: gm.crew,
           encounters: gm.encounters,
@@ -142,6 +147,7 @@ export function createSession(update: (view: ViewState) => void) {
           party.some((p) => p.connectionId === controller && p.role === "GM");
         live = {
           sessionId: shared.sessionId,
+          round: shared.round,
           ships: [...shared.ships, ...gm.ships],
           crew: [...shared.crew, ...gm.crew],
           encounters: gm.encounters,
@@ -160,6 +166,7 @@ export function createSession(update: (view: ViewState) => void) {
       if (ticket !== reading) return;
       live = {
         sessionId: null,
+        round: 1,
         ships: [],
         crew: [],
         encounters: [],
@@ -181,6 +188,7 @@ export function createSession(update: (view: ViewState) => void) {
     }
     update({
       sessionId: null,
+      round: 1,
       ships: [],
       crew: [],
       encounters: [],
@@ -242,7 +250,11 @@ export function createSession(update: (view: ViewState) => void) {
       const result = execute(demo, command, demoRole === "GM");
       demo = result.state;
       showDemo();
-      return { notice: result.notice, roll: result.roll };
+      return {
+        notice: result.notice,
+        roll: result.roll,
+        selectionId: result.selectionId,
+      };
     }
     if (!live?.ready)
       throw new Error(live?.status ?? "Wait for Owlbear to connect.");
@@ -277,28 +289,117 @@ export function createSession(update: (view: ViewState) => void) {
     return reply;
   }
   async function roll(commandData: Command) {
-    const result = await command(commandData);
-    if (!result.roll) return result.notice ?? "Action used.";
-    if (!OBR.isAvailable)
-      return `${result.roll.target === "gm_only" ? "Private" : "Public"} demo · ${result.roll.notation}. No dice rolled.`;
+    const initiative = commandData.op === "initiative-roll";
+    if (commandData.op !== "roll" && !initiative)
+      throw new Error("Invalid roll command.");
+    const preview = await command(
+      initiative ? commandData : { ...commandData, op: "roll-preview" },
+    );
+    if (!preview.roll) {
+      const result = await command(commandData);
+      return result.notice ?? "Action used.";
+    }
+    if (!OBR.isAvailable) {
+      const result = initiative
+        ? preview
+        : await command({
+            ...commandData,
+            expectedNotation: preview.roll.notation,
+          } as Command);
+      if (initiative && preview.roll.initiativeToken)
+        await command({
+          op: "initiative-result",
+          crewId: commandData.crewId,
+          token: preview.roll.initiativeToken,
+          value: randomInitiative(preview.roll.notation),
+        });
+      return `${result.roll?.target === "gm_only" ? "Private" : "Public"} demo · ${result.roll?.notation}. No Dice+ roll sent.`;
+    }
     const dice = createDicePlusClient("com.ddotts.crowbear.spaceship-combat");
     if (!(await dice.isReady()))
       throw new Error("Enable Dice+ in this room before rolling.");
-    const validation = await dice.validateNotation(result.roll.notation);
+    const validation = await dice.validateNotation(preview.roll.notation);
     if (!validation.valid)
       throw new Error(
         validation.error?.message ?? "Dice+ rejected this notation.",
       );
-    await dice.roll({
+    const result = initiative
+      ? preview
+      : await command({
+          ...commandData,
+          expectedNotation: preview.roll.notation,
+        } as Command);
+    if (!result.roll) throw new Error("Roll preparation failed.");
+    const rolled = await dice.roll({
       diceNotation: validation.notation,
       rollTarget: result.roll.target,
       showResults: true,
     });
-    return "Roll complete. Dice+ displays it to the correct audience.";
+    if (initiative && result.roll.initiativeToken)
+      await command({
+        op: "initiative-result",
+        crewId: commandData.crewId,
+        token: result.roll.initiativeToken,
+        value: rolled.result.totalValue,
+      });
+    return initiative
+      ? "Initiative added to the tracker."
+      : "Roll complete. Dice+ displays it to the correct audience.";
+  }
+  async function activateSelection(
+    commandData: Extract<
+      Command,
+      { op: "activate-selection" | "selection-preview" }
+    >,
+  ) {
+    const preview = await command({ ...commandData, op: "selection-preview" });
+    const dice =
+      OBR.isAvailable && preview.roll
+        ? createDicePlusClient("com.ddotts.crowbear.spaceship-combat")
+        : undefined;
+    let validatedNotation = preview.roll?.notation;
+    if (dice) {
+      if (!(await dice.isReady()))
+        throw new Error(
+          "Enable Dice+ in this room before activating this action.",
+        );
+      const validation = await dice.validateNotation(preview.roll!.notation);
+      validatedNotation = validation.notation;
+      if (!validation.valid)
+        throw new Error(
+          validation.error?.message ?? "Dice+ rejected this notation.",
+        );
+    }
+    const result = await command({
+      ...commandData,
+      op: "activate-selection",
+      expectedNotation: preview.roll?.notation ?? "",
+    });
+    if (!result.selectionId)
+      throw new Error("Activation did not produce a selection.");
+    let notice = result.notice ?? "Activation spent.";
+    if (result.roll) {
+      if (dice) {
+        try {
+          await dice.roll({
+            diceNotation: validatedNotation ?? result.roll.notation,
+            rollTarget: result.roll.target,
+            showResults: true,
+          });
+          notice =
+            "Roll complete. Choose a target; cancelling does not refund activation costs.";
+        } catch (error) {
+          notice = `Activation costs remain spent. Dice+ did not confirm the roll: ${error instanceof Error ? error.message : "Roll failed"}. Check Dice+ before resolving or cancelling.`;
+        }
+      } else
+        notice = `${result.roll.target === "gm_only" ? "Private" : "Public"} demo · ${result.roll.notation}. Activation costs spent; choose a target.`;
+    }
+    return { selectionId: result.selectionId, notice };
   }
   return {
     start,
     command,
+    activateSelection,
     roll,
     refresh: () => (OBR.isAvailable ? read() : Promise.resolve(showDemo())),
     setDemoRole: (role: "GM" | "Player") => {
