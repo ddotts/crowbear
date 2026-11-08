@@ -23,6 +23,7 @@ for (const entry of await readdir(output, { withFileTypes: true })) {
     manifest.icon,
     manifest.action.icon,
     manifest.action.popover,
+    ...(manifest.background_url ? [manifest.background_url] : []),
   ]) {
     assert.ok(
       path.startsWith("./"),
@@ -35,14 +36,19 @@ for (const entry of await readdir(output, { withFileTypes: true })) {
     );
     await access(url);
   }
-  const html = await readFile(new URL(manifest.action.popover, base), "utf8");
-  for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
-    const path = match[1];
-    assert.ok(
-      path.startsWith("./"),
-      `${entry.name}: built asset must be relative: ${path}`,
-    );
-    await access(new URL(path, base));
+  for (const entryHtml of [
+    manifest.action.popover,
+    ...(manifest.background_url ? [manifest.background_url] : []),
+  ]) {
+    const html = await readFile(new URL(entryHtml, base), "utf8");
+    for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
+      const path = match[1];
+      assert.ok(
+        path.startsWith("./"),
+        `${entry.name}: built asset must be relative: ${path}`,
+      );
+      await access(new URL(path, base));
+    }
   }
   count++;
   console.log(

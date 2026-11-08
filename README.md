@@ -36,6 +36,7 @@ disables rolling; it does not simulate results.
 
 ```text
 extensions/sandbox/    Installable integration workbench; no local dice engine
+extensions/spaceship-combat/  Compact GM/player spaceship combat extension
 packages/dice-plus/    Typed Dice+ client and protocol tests
 scripts/              Deployment assembly and manifest verification
 .agents/skills/       Canonical project skills shared with Codex and Claude
@@ -45,6 +46,34 @@ To add an extension, follow the `owlbear-extension` skill or the
 [extension contract](docs/architecture.md#extension-contract). Give it its own
 slug, package, manifest, version, and build scripts. Assembly discovers extension
 directories automatically; users install only the manifests they choose.
+
+## Spaceship combat
+
+Run `pnpm --filter @crowbear/spaceship-combat dev` and open
+<http://127.0.0.1:5174> for the standalone demo. Install
+`http://127.0.0.1:5174/manifest.json` in Owlbear for live use, then enable the
+extension and Dice+ in the room and open a scene. The GM initializes the sample
+player ship and a private library with two NPC ships and a sample encounter.
+
+The compact panel supports encounters, crew assignments, damage effects,
+station configurations, AC/maxG/Speed modifiers, Markdown descriptions and Dice+
+rolls. In Owlbear, player ships/crew sync to scene metadata; NPCs and encounters
+persist in the GM browser. Outside Owlbear, changes are an unsaved demo.
+See the [storage, JSON and rules contract](docs/spaceship-combat.md), including
+operating limits and rules to review. Use **Import → Export** for backups.
+
+With the dev server running, execute the SDK host fixture:
+
+```sh
+pnpm --filter @crowbear/spaceship-combat exec playwright install chromium
+pnpm --filter @crowbear/spaceship-combat qa:room
+pnpm --filter @crowbear/spaceship-combat qa:panel
+```
+
+This tests SDK integration against a local host and Dice+ protocol fixture;
+actual room installation and audience routing still require real-room testing.
+After deployment, the install URL will be
+<https://ddotts.github.io/crowbear/spaceship-combat/manifest.json>.
 
 ## Dice+ bridge
 
