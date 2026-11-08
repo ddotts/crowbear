@@ -1,11 +1,21 @@
 import assert from "node:assert/strict";
 import { access, readdir, readFile } from "node:fs/promises";
+import { pagesBase } from "./manifest-urls.mjs";
 
 const output = new URL("../dist/", import.meta.url);
 let count = 0;
 for (const entry of await readdir(output, { withFileTypes: true })) {
   if (!entry.isDirectory()) continue;
   const base = new URL(`${entry.name}/`, output);
+  const hostedBase = new URL(`${entry.name}/`, pagesBase);
+  const localReference = (path) => {
+    const url = new URL(path);
+    assert.ok(
+      url.href.startsWith(hostedBase.href),
+      `${entry.name}: manifest URL must include the full hosted extension path: ${path}`,
+    );
+    return new URL(url.pathname.slice(hostedBase.pathname.length), base);
+  };
   const manifest = JSON.parse(
     await readFile(new URL("manifest.json", base), "utf8"),
   );
@@ -25,11 +35,7 @@ for (const entry of await readdir(output, { withFileTypes: true })) {
     manifest.action.popover,
     ...(manifest.background_url ? [manifest.background_url] : []),
   ]) {
-    assert.ok(
-      path.startsWith("./"),
-      `${entry.name}: manifest path must be relative: ${path}`,
-    );
-    const url = new URL(path, base);
+    const url = localReference(path);
     assert.ok(
       url.href.startsWith(base.href),
       `${entry.name}: path escapes extension directory`,
@@ -40,14 +46,15 @@ for (const entry of await readdir(output, { withFileTypes: true })) {
     manifest.action.popover,
     ...(manifest.background_url ? [manifest.background_url] : []),
   ]) {
-    const html = await readFile(new URL(entryHtml, base), "utf8");
+    const localHtml = localReference(entryHtml);
+    const html = await readFile(localHtml, "utf8");
     for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
       const path = match[1];
       assert.ok(
         path.startsWith("./"),
         `${entry.name}: built asset must be relative: ${path}`,
       );
-      await access(new URL(path, base));
+      await access(new URL(path, localHtml));
     }
   }
   count++;

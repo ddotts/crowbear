@@ -114,6 +114,8 @@ response validation, and upstream documentation caveats.
 ## Hosting and installation
 
 `pnpm build` produces a static `dist/` tree suitable for public HTTPS hosting.
+Assembly writes full GitHub Pages URLs into install manifests so Owlbear loads
+the correct icon and iframe beneath `/crowbear/<slug>/`. Bundled assets stay relative.
 The sandbox's install link is `<hosting-base>/sandbox/manifest.json`. Keep that
 URL stable once installed.
 

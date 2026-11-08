@@ -9,8 +9,10 @@ methods in the official Owlbear documentation or installed SDK types.
 
 Each extension lives in extensions/<slug> with a private @crowbear/<slug> package,
 its own version, Vite config, public/manifest.json, public/icon.svg, and src.
-Use relative Vite asset paths and relative manifest references so the extension
-works beneath a repository path as well as on localhost. Match package and
+Use relative Vite HTML asset paths. Source manifest resources use / paths for
+local development; assembly rewrites them to full hosted URLs with the repository
+and extension path. Owlbear does not resolve ./ manifest references against the
+manifest directory. Verify icon, popover and background URLs. Match package and
 manifest versions. Do not rename a released slug without a migration decision.
 
 Declare dev, typecheck, and build scripts. The root assembly script discovers

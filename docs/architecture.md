@@ -9,13 +9,19 @@ extension. There is no npm publication step: Owlbear installs a hosted manifest.
 - `public/manifest.json` declares `manifest_version: 1`, the extension's version,
   icon, and action popover. Its version matches the package version. An optional
   `background_url` loads a controller independently of the action popover.
-- Manifest URLs are relative (`./icon.svg`, `./index.html`), and Vite uses
-  `base: "./"`. This keeps paths valid under `/crowbear/<slug>/` on GitHub Pages
-  and at `/` during local development.
+- Source manifest resources use origin-root paths (`/icon.svg`, `/index.html`)
+  for local Vite servers. Vite uses `base: "./"` for bundled HTML assets.
+  Assembly rewrites manifest icons, popovers and background URLs to full
+  `https://ddotts.github.io/crowbear/<slug>/...` URLs. Owlbear does not resolve
+  `./` references against the manifest directory: an installed relative path
+  produced `https://ddotts.github.io./index.html`, losing the repository path
+  and breaking both the icon and iframe. Keep bundled HTML assets relative;
+  deployed manifest resources must be absolute and include the extension path.
 - Each package supplies `dev`, `typecheck`, and `build` scripts. Root recursive
   commands run the corresponding scripts across all extensions.
 - `scripts/assemble.mjs` copies extension builds into `dist/<slug>/` after a
-  successful build. `scripts/verify-dist.mjs` checks the built manifests and
+  successful build and publishes their manifest URLs using
+  `scripts/manifest-urls.mjs`. `scripts/verify-dist.mjs` checks the built manifests and
   their referenced local files, including background entrypoints when present. The generated `dist/` tree is the deployment artifact.
 - SDK calls wait for `OBR.onReady` and only run when `OBR.isAvailable` is true.
   An extension can render outside Owlbear for development.
